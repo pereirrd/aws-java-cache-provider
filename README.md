@@ -5,20 +5,20 @@ Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write
 ## Pré-requisitos
 
 - **JDK 25** (definido em `maven.compiler.release` no POM raiz).
-- `JAVA_HOME` apontando para o JDK 25 ao usar `./mvnw` (ou `mvn`).
+- **Apache Maven** instalado e `JAVA_HOME` apontando para o JDK 25.
 
 ## Compilar
 
 Na raiz do repositório:
 
 ```bash
-./mvnw clean verify
+mvn clean verify
 ```
 
 A fase `verify` inclui formatação (Spotless). Para aplicar o formato sem falhar o build:
 
 ```bash
-./mvnw spotless:apply
+mvn spotless:apply
 ```
 
 ## Módulos (coordenadas Maven)

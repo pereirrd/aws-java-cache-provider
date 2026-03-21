@@ -142,7 +142,7 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 - [x] `pom` **pai** (`packaging` `pom`) + módulos filhos: **`…-core`**, **`…-cache-aside`**, **`…-read-through`**, **`…-write-through`**, **`…-write-behind`** (+ opcional JPA/SPI). [§ 0.1](#01-provedor-de-cache-redis-ou-memcached-decidido): um provider Redis ou Memcached por aplicação em *runtime*.
 - [x] **Java 25** (`maven.compiler.release` = `25`; *plugin* compatível).
-- [x] **Maven Wrapper** (`mvnw`, `.mvn/wrapper`).
+- [ ] **Maven Wrapper** (`mvnw`, `.mvn/wrapper`).
 - [x] `groupId`, `artifactId`, `version`, convenção de pacotes.
 - [x] Surefire (e opcionalmente Failsafe).
 
