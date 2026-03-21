@@ -140,38 +140,38 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 ### 1.1 Estrutura e build
 
-- [ ] `pom` **pai** (`packaging` `pom`) + módulos filhos: **`…-core`**, **`…-cache-aside`**, **`…-read-through`**, **`…-write-through`**, **`…-write-behind`** (+ opcional JPA/SPI). [§ 0.1](#01-provedor-de-cache-redis-ou-memcached-decidido): um provider Redis ou Memcached por aplicação em *runtime*.
-- [ ] **Java 25** (`maven.compiler.release` = `25`; *plugin* compatível).
-- [ ] **Maven Wrapper** (`mvnw`, `.mvn/wrapper`).
-- [ ] `groupId`, `artifactId`, `version`, convenção de pacotes.
-- [ ] Surefire (e opcionalmente Failsafe).
+- [x] `pom` **pai** (`packaging` `pom`) + módulos filhos: **`…-core`**, **`…-cache-aside`**, **`…-read-through`**, **`…-write-through`**, **`…-write-behind`** (+ opcional JPA/SPI). [§ 0.1](#01-provedor-de-cache-redis-ou-memcached-decidido): um provider Redis ou Memcached por aplicação em *runtime*.
+- [x] **Java 25** (`maven.compiler.release` = `25`; *plugin* compatível).
+- [x] **Maven Wrapper** (`mvnw`, `.mvn/wrapper`).
+- [x] `groupId`, `artifactId`, `version`, convenção de pacotes.
+- [x] Surefire (e opcionalmente Failsafe).
 
 ### 1.2 Padrões de código e documentação
 
-- [ ] `.editorconfig` / formatação (Spotless, fmt-maven-plugin ou Checkstyle).
-- [ ] `README`: pré-requisitos, compilar, publicar artefactos.
-- [ ] `LICENSE`, se aplicável.
+- [x] `.editorconfig` / formatação (Spotless, fmt-maven-plugin ou Checkstyle).
+- [x] `README`: pré-requisitos, compilar, publicar artefactos.
+- [x] `LICENSE`, se aplicável.
 
 ### 1.3 Dependências — AWS (SDK for Java 2.x)
 
 *BOM* `software.amazon.awssdk:bom`; incluir só o necessário.
 
-- [ ] `software.amazon.awssdk:elasticache` (*control plane*; não substitui cliente de dados).
-- [ ] `auth`, `regions` (se controlo explícito).
-- [ ] Opcional: `sts`, `secretsmanager`, `cloudwatch`.
+- [x] `software.amazon.awssdk:elasticache` (*control plane*; não substitui cliente de dados).
+- [x] `auth`, `regions` (se controlo explícito).
+- [x] Opcional: `sts`, `secretsmanager`, `cloudwatch`.
 
 > Tráfego de **dados** Redis/Memcached continua em clientes de protocolo ([§ 1.4](#14-dependências--clientes-de-protocolo-dados)); o SDK AWS cobre gestão e integrações em redor do cluster.
 
 ### 1.4 Dependências — clientes de protocolo (dados)
 
-- [ ] **Redis:** `io.lettuce:lettuce-core` *ou* `redis.clients:jedis`.
-- [ ] **Memcached:** `net.spy:spymemcached` (validar compatibilidade ElastiCache).
+- [x] **Redis:** `io.lettuce:lettuce-core` *ou* `redis.clients:jedis`.
+- [x] **Memcached:** `net.spy:spymemcached` (validar compatibilidade ElastiCache).
 
 ### 1.5 Dependências — JPA
 
-- [ ] `jakarta.persistence:jakarta.persistence-api` — preferir **`provided`** ([§ 0.4](#04-contrato-da-camada-jpa-plugavel-decidido)).
-- [ ] Hibernate **não** obrigatório no `core`; `test` ou consumidor.
-- [ ] Sem `spring-boot-starter-data-jpa` na lib.
+- [x] `jakarta.persistence:jakarta.persistence-api` — preferir **`provided`** ([§ 0.4](#04-contrato-da-camada-jpa-plugavel-decidido)).
+- [x] Hibernate **não** obrigatório no `core`; `test` ou consumidor.
+- [x] Sem `spring-boot-starter-data-jpa` na lib.
 
 ---
 
