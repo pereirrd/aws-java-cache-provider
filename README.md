@@ -26,7 +26,6 @@ mvn spotless:apply
 | Módulo | `artifactId` |
 |--------|----------------|
 | Núcleo partilhado | `aws-java-cache-provider-core` |
-| SPI JPA (opcional) | `aws-java-cache-provider-jpa-api` |
 | Cache-aside | `aws-java-cache-provider-cache-aside` |
 | Read-through | `aws-java-cache-provider-read-through` |
 | Write-through | `aws-java-cache-provider-write-through` |
