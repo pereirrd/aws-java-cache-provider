@@ -90,7 +90,7 @@ Todas as subsecções abaixo estão **decididas**; funcionam como contrato de ar
 | **Objetivo** | Cada estratégia é um **artefacto Maven próprio**; o consumidor declara **só** o que usar. |
 | **Módulo comum** | **`…-core`**: fábricas Redis/Memcached, configuração (endpoints, TLS, timeouts, *pools*), serialização, exceções, utilitários. Módulos de estratégia **dependem do core**, não entre si. |
 | **Consumo** | Dependência ao(s) módulo(s) de estratégia necessários (o core entra em geral por transitividade). |
-| **JPA** | Contrato SPI pode ficar num módulo dedicado (ex. `jpa-api`), conforme o desenho final. |
+| **JPA** | Contrato SPI / integração com persistência conforme o desenho final (p.ex. no `…-core` ou extensões). |
 
 **Nomes sugeridos** *(ajustar `artifactId` real):*
 

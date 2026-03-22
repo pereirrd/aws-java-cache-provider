@@ -26,7 +26,6 @@
 
   <modules>
     <module>aws-java-cache-provider-core</module>
-    <module>aws-java-cache-provider-jpa-api</module>
     <module>aws-java-cache-provider-cache-aside</module>
     <module>aws-java-cache-provider-read-through</module>
     <module>aws-java-cache-provider-write-through</module>
@@ -41,6 +40,8 @@
     <lettuce.version>6.5.5.RELEASE</lettuce.version>
     <spymemcached.version>2.12.3</spymemcached.version>
     <jakarta.persistence.version>3.2.0</jakarta.persistence.version>
+    <jakarta.inject.version>2.0.1</jakarta.inject.version>
+    <jakarta.cdi.version>4.1.0</jakarta.cdi.version>
 
     <junit.jupiter.version>5.11.4</junit.jupiter.version>
     <assertj.version>3.27.3</assertj.version>
@@ -76,15 +77,20 @@
         <artifactId>jakarta.persistence-api</artifactId>
         <version>${jakarta.persistence.version}</version>
       </dependency>
+      <dependency>
+        <groupId>jakarta.inject</groupId>
+        <artifactId>jakarta.inject-api</artifactId>
+        <version>${jakarta.inject.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        <version>${jakarta.cdi.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>io.github.pereirrd.awsjavacache</groupId>
         <artifactId>aws-java-cache-provider-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.pereirrd.awsjavacache</groupId>
-        <artifactId>aws-java-cache-provider-jpa-api</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
