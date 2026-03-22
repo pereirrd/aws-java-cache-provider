@@ -3,7 +3,6 @@ package io.github.pereirrd.awsjavacache.util;
 import java.util.Locale;
 import java.util.Map;
 
-/** Shared parsing helpers for environment-backed configuration. */
 public class CacheEnvSupport {
 
   private CacheEnvSupport() {}

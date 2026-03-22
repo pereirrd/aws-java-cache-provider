@@ -6,9 +6,6 @@ import net.spy.memcached.AddrUtil;
 import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.MemcachedClient;
 
-/**
- * Factory for {@link MemcachedClient} instances using {@link MemcachedCacheEnvConfig} (typically from env).
- */
 public final class MemcachedCacheClientFactory {
 
   private MemcachedCacheClientFactory() {}

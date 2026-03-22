@@ -6,12 +6,6 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import java.util.Objects;
 
-/**
- * {@link CacheProvider} backed by Redis (Lettuce), using the Redis STRING commands (GET / SET / DEL).
- *
- * <p>Use {@link #utf8Strings(RedisClient)} for a connection with the default string codec, or pass a {@link
- * StatefulRedisConnection} for {@code String} keys and values.
- */
 public final class RedisCacheProvider implements CacheProvider {
 
   private final StatefulRedisConnection<String, String> connection;
@@ -22,7 +16,6 @@ public final class RedisCacheProvider implements CacheProvider {
     this.commands = connection.sync();
   }
 
-  /** Conexão UTF-8 string keys/values via {@link RedisClient#connect()}. */
   public static RedisCacheProvider utf8Strings(RedisClient redisClient) {
     Objects.requireNonNull(redisClient, "redisClient");
     return new RedisCacheProvider(redisClient.connect());

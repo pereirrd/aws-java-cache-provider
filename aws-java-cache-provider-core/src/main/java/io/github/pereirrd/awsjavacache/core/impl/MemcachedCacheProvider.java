@@ -9,23 +9,14 @@ import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.transcoders.SerializingTranscoder;
 import net.spy.memcached.transcoders.Transcoder;
 
-/**
- * {@link CacheProvider} backed by Memcached (spymemcached). Chaves e valores são strings.
- *
- * <p>Use {@link #utf8Strings(MemcachedClient)} com {@link SerializingTranscoder} (adequado a {@link String}.
- */
 public final class MemcachedCacheProvider implements CacheProvider {
 
   private final MemcachedClient client;
   private final Transcoder<String> valueTranscoder;
   private final int expirationSeconds;
 
-  /**
-   * @param expirationSeconds TTL em segundos ({@code set}). Use {@code 0} para sem expiração, conforme
-   *     protocolo / cliente Memcached.
-   */
-  public MemcachedCacheProvider( MemcachedClient client, Transcoder<String> valueTranscoder, 
-    int expirationSeconds) {
+  public MemcachedCacheProvider(
+      MemcachedClient client, Transcoder<String> valueTranscoder, int expirationSeconds) {
     this.client = Objects.requireNonNull(client, "client");
     this.valueTranscoder = Objects.requireNonNull(valueTranscoder, "valueTranscoder");
     this.expirationSeconds = expirationSeconds;

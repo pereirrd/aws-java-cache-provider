@@ -8,12 +8,6 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Named;
 import java.io.IOException;
 
-/**
- * CDI producers for {@link CacheProvider} backed by Redis (Lettuce) and Memcached (spymemcached), wired from
- * environment variables via {@link RedisCacheClientFactory} and {@link MemcachedCacheClientFactory}.
- *
- * <p>Inject with {@code @Named("redis")} or {@code @Named("memcached")}.
- */
 @ApplicationScoped
 public class CacheProviderFactory {
 

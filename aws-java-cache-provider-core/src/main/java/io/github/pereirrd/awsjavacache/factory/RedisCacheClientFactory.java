@@ -4,7 +4,6 @@ import io.github.pereirrd.awsjavacache.config.RedisCacheEnvConfig;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 
-/** Factory for Lettuce {@link RedisClient} instances using {@link RedisCacheEnvConfig} (typically from env). */
 public final class RedisCacheClientFactory {
 
   private RedisCacheClientFactory() {}

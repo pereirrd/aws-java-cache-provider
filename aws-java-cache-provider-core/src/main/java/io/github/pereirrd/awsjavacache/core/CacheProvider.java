@@ -1,6 +1,5 @@
 package io.github.pereirrd.awsjavacache.core;
 
-/** Cache de chaves e valores texto (UTF-8 / string). */
 public interface CacheProvider {
 
   String get(String key);
