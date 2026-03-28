@@ -3,6 +3,7 @@ package io.github.pereirrd.awsjavacache.factory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.pereirrd.awsjavacache.config.RedisCacheEnvConfig;
+import io.lettuce.core.RedisCredentialsProvider;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -16,8 +17,11 @@ class RedisCacheFactoryTest {
         var config = RedisCacheEnvConfig.from(env);
         var uri = RedisCacheClientFactory.toRedisUri(config);
         assertThat(uri.getHost()).isEqualTo(config.getHost());
-        assertThat(new String(uri.getPassword())).isEqualTo(config.getPassword());
-        assertThat(uri.getUsername()).isNull();
+        var creds =
+                ((RedisCredentialsProvider.ImmediateRedisCredentialsProvider) uri.getCredentialsProvider())
+                        .resolveCredentialsNow();
+        assertThat(new String(creds.getPassword())).isEqualTo(config.getPassword());
+        assertThat(creds.getUsername()).isNull();
         assertThat(uri.getPort()).isEqualTo(config.getPort());
         assertThat(uri.isSsl()).isEqualTo(config.isTls());
         assertThat(uri.getDatabase()).isEqualTo(config.getDatabase());
