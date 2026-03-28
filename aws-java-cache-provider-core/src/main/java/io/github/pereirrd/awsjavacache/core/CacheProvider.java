@@ -2,17 +2,17 @@ package io.github.pereirrd.awsjavacache.core;
 
 public interface CacheProvider {
 
-  String get(String key);
+    String get(String key);
 
-  void put(String key, String value);
+    void put(String key, String value);
 
-  void remove(String key);
+    void remove(String key);
 
-  void clear();
+    void clear();
 
-  void close();
+    void close();
 
-  void flush();
+    void flush();
 
-  void invalidate(String key);
+    void invalidate(String key);
 }

@@ -4,17 +4,17 @@ import java.util.List;
 
 public interface MissPlugin {
 
-  String findById(String id);
+    String findById(String id);
 
-  void save(String entity);
+    void save(String entity);
 
-  void deleteById(String id);
+    void deleteById(String id);
 
-  List<String> findAll();
+    List<String> findAll();
 
-  long count();
+    long count();
 
-  boolean existsById(String id);
+    boolean existsById(String id);
 
-  void deleteAll();
+    void deleteAll();
 }

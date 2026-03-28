@@ -11,23 +11,23 @@ import java.io.IOException;
 @ApplicationScoped
 public class CacheProviderFactory {
 
-  @Produces
-  @ApplicationScoped
-  @Named("redis")
-  public CacheProvider redisCacheProvider() {
-    var redisClient = RedisCacheClientFactory.fromEnvironment();
-    return RedisCacheProvider.utf8Strings(redisClient);
-  }
-
-  @Produces
-  @ApplicationScoped
-  @Named("memcached")
-  public CacheProvider memcachedCacheProvider() {
-    try {
-      var memcachedClient = MemcachedCacheClientFactory.fromEnvironment();
-      return MemcachedCacheProvider.utf8Strings(memcachedClient);
-    } catch (IOException e) {
-      throw new IllegalStateException("Failed to create Memcached client from environment", e);
+    @Produces
+    @ApplicationScoped
+    @Named("redis")
+    public CacheProvider redisCacheProvider() {
+        var redisClient = RedisCacheClientFactory.fromEnvironment();
+        return RedisCacheProvider.utf8Strings(redisClient);
     }
-  }
+
+    @Produces
+    @ApplicationScoped
+    @Named("memcached")
+    public CacheProvider memcachedCacheProvider() {
+        try {
+            var memcachedClient = MemcachedCacheClientFactory.fromEnvironment();
+            return MemcachedCacheProvider.utf8Strings(memcachedClient);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to create Memcached client from environment", e);
+        }
+    }
 }
