@@ -14,37 +14,38 @@ class RedisCacheEnvConfigTest {
   void from_requiresHost() {
     assertThatThrownBy(() -> RedisCacheEnvConfig.from(Map.of()))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining(RedisCacheEnvConfig.Keys.HOST);
+        .hasMessageContaining(RedisCacheEnvConfig.HOST);
   }
 
   @Test
   void from_appliesElastiCacheRedisDefaults() {
     var env = new HashMap<String, String>();
-    env.put(RedisCacheEnvConfig.Keys.HOST, "master.prod.abc123.use1.cache.amazonaws.com");
+    env.put(RedisCacheEnvConfig.HOST, "master.prod.abc123.use1.cache.amazonaws.com");
     var config = RedisCacheEnvConfig.from(env);
-    assertThat(config.host()).isEqualTo("master.prod.abc123.use1.cache.amazonaws.com");
-    assertThat(config.port()).isEqualTo(6379);
-    assertThat(config.tls()).isFalse();
-    assertThat(config.database()).isZero();
-    assertThat(config.commandTimeout()).isEmpty();
-    assertThat(config.username()).isNull();
-    assertThat(config.password()).isNull();
+    assertThat(config.getHost()).isEqualTo("master.prod.abc123.use1.cache.amazonaws.com");
+    assertThat(config.getPort()).isEqualTo(6379);
+    assertThat(config.isTls()).isFalse();
+    assertThat(config.getDatabase()).isZero();
+    assertThat(config.getCommandTimeout()).isEqualTo(Duration.ZERO);
+    assertThat(config.getUsername()).isNull();
+    assertThat(config.getPassword()).isNull();
   }
 
   @Test
   void from_readsTlsAclAndTimeoutForEncryptedClusterEndpoint() {
-    var env = Map.of(
-        RedisCacheEnvConfig.Keys.HOST, "clustercfg.prod.abc123.use1.cache.amazonaws.com",
-        RedisCacheEnvConfig.Keys.PORT, "6379",
-        RedisCacheEnvConfig.Keys.TLS, "true",
-        RedisCacheEnvConfig.Keys.USERNAME, "app-user",
-        RedisCacheEnvConfig.Keys.PASSWORD, "rotated-secret",
-        RedisCacheEnvConfig.Keys.DATABASE, "0",
-        RedisCacheEnvConfig.Keys.TIMEOUT_MS, "2000");
+    var env =
+        Map.of(
+            RedisCacheEnvConfig.HOST, "clustercfg.prod.abc123.use1.cache.amazonaws.com",
+            RedisCacheEnvConfig.PORT, "6379",
+            RedisCacheEnvConfig.TLS, "true",
+            RedisCacheEnvConfig.USERNAME, "app-user",
+            RedisCacheEnvConfig.PASSWORD, "rotated-secret",
+            RedisCacheEnvConfig.DATABASE, "0",
+            RedisCacheEnvConfig.TIMEOUT_MS, "2000");
     var config = RedisCacheEnvConfig.from(env);
-    assertThat(config.tls()).isTrue();
-    assertThat(config.username()).isEqualTo("app-user");
-    assertThat(config.password()).isEqualTo("rotated-secret");
-    assertThat(config.commandTimeout()).contains(Duration.ofMillis(2000));
+    assertThat(config.isTls()).isTrue();
+    assertThat(config.getUsername()).isEqualTo("app-user");
+    assertThat(config.getPassword()).isEqualTo("rotated-secret");
+    assertThat(config.getCommandTimeout()).isEqualTo(Duration.ofMillis(2000));
   }
 }
