@@ -1,19 +1,26 @@
 package io.github.pereirrd.awsjavacache.core;
 
-/** Cache de chaves e valores texto (UTF-8 / string). */
+import java.time.Duration;
+
 public interface CacheProvider {
 
-  String get(String key);
+    String get(String key);
 
-  void put(String key, String value);
+    void put(String key, String value);
 
-  void remove(String key);
+    /**
+     * Stores a value with a time-to-live. When {@code ttl} is null, zero, or negative, behaviour matches
+     * {@link #put(String, String)} (no expiry where the engine supports it).
+     */
+    void put(String key, String value, Duration ttl);
 
-  void clear();
+    void remove(String key);
 
-  void close();
+    void clear();
 
-  void flush();
+    void close();
 
-  void invalidate(String key);
+    void flush();
+
+    void invalidate(String key);
 }

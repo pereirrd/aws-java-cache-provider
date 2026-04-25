@@ -2,6 +2,7 @@ package io.github.pereirrd.awsjavacache.service;
 
 import io.github.pereirrd.awsjavacache.core.CacheProvider;
 import jakarta.inject.Singleton;
+import java.time.Duration;
 
 @Singleton
 public class CacheService {
@@ -12,12 +13,16 @@ public class CacheService {
         this.cacheProvider = cacheProvider;
     }
 
-    public void get(String key) {
-        cacheProvider.get(key);
+    public String get(String key) {
+        return cacheProvider.get(key);
     }
 
     public void put(String key, String value) {
         cacheProvider.put(key, value);
+    }
+
+    public void put(String key, String value, Duration ttl) {
+        cacheProvider.put(key, value, ttl);
     }
 
     public void remove(String key) {

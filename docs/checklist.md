@@ -142,7 +142,7 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 - [x] `pom` **pai** (`packaging` `pom`) + módulos filhos: **`…-core`**, **`…-cache-aside`**, **`…-read-through`**, **`…-write-through`**, **`…-write-behind`** (+ opcional JPA/SPI). [§ 0.1](#01-provedor-de-cache-redis-ou-memcached-decidido): um provider Redis ou Memcached por aplicação em *runtime*.
 - [x] **Java 25** (`maven.compiler.release` = `25`; *plugin* compatível).
-- [ ] **Maven Wrapper** (`mvnw`, `.mvn/wrapper`).
+- [x] **Maven Wrapper** (`mvnw`, `.mvn/wrapper`; *distributionType* `only-script`).
 - [x] `groupId`, `artifactId`, `version`, convenção de pacotes.
 - [x] Surefire (e opcionalmente Failsafe).
 
@@ -181,11 +181,11 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 [§ 0.5](#05-estrutura-modular-da-biblioteca-decidido).
 
-- [ ] Interfaces: fábrica de conexão (Redis vs Memcached), configuração (endpoints, TLS, timeouts, *pool*).
-- [ ] Modelo chave/valor (serialização, limites por engine).
-- [ ] Exceções (`CacheException`, timeouts, indisponibilidade).
+- [x] Interfaces: fábrica de conexão (Redis vs Memcached), configuração (endpoints, TLS, timeouts, *pool*).
+- [x] Modelo chave/valor (serialização via `CacheValueSerializer`; limites por engine a documentar no consumidor).
+- [x] Exceções base (`CacheException`; *timeouts* / indisponibilidade a expandir).
 - [ ] Métricas e *hooks* opcionais (hit/miss, latência).
-- [ ] Documentar **TTL** por estratégia (onde aplica).
+- [ ] Documentar **TTL** por estratégia (parcial: `CacheProvider#put` com `Duration`, *cache-aside* com TTL por serviço).
 
 ---
 
@@ -195,8 +195,8 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 [§ 0.4](#04-contrato-da-camada-jpa-plugavel-decidido); módulo SPI/contrato, sem poluir o `core`.
 
-- [ ] Formalizar interface CRUD `<ID, M>`: assinaturas, exceções, transações esperadas; **sem** `EntityManager` na API pública.
-- [ ] Documentar implementação pelo consumidor (JPA na app; Spring Data opcional).
+- [x] Formalizar interface CRUD `<ID, M>` (`BackingRepository` em `…core`: `findById`, `save`, `deleteById`); **sem** `EntityManager` na API pública.
+- [x] Documentar implementação pelo consumidor (README *cache-aside*; JPA/Spring Data na app).
 - [ ] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app**.
 - [ ] Testes de integração BD (H2 / Testcontainers PostgreSQL/MySQL) **só** no módulo JPA.
 
@@ -208,10 +208,10 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 Depende de **`…-core`**. [§ 0.5](#05-estrutura-modular-da-biblioteca-decidido).
 
-- [ ] Fluxo: `get` → *miss* → repositório `<ID, M>` → `set`.
+- [x] Fluxo: `get` → *miss* → `BackingRepository#findById` → `put` com TTL (`CacheAsideService`).
 - [ ] **Anotações** Java (chave, TTL, id de cache); processamento em runtime opcional / na app ([§ 0.3](#03-stack-core-puro-java-e-aws-decidido)).
-- [ ] API de invalidação/atualização explícita (contrato documentado).
-- [ ] Testes unitários (mocks cliente + repositório).
+- [x] API de invalidação/atualização explícita (`evict`, `putCached`; README).
+- [x] Testes unitários (dublês de `CacheProvider` + repositório).
 - [ ] Testes de integração: [§ 0.6](#06-testes-e-ambiente-local-decidido).
 
 ---
@@ -252,8 +252,8 @@ Depende de **`…-core`**.
 
 ## Fase 8 — Release e documentação
 
-- [ ] README / `examples`: snippet por estratégia; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)).
-- [ ] CI: `mvn verify`, JDK 25, cache Maven.
+- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (outras estratégias: exemplos por fazer).
+- [x] CI: `mvn verify`, JDK 25, cache Maven (GitHub Actions).
 - [ ] Versionamento semântico; Maven Central / GitHub Packages; `distributionManagement`.
 - [ ] Segurança: OWASP Dependency-Check / Dependabot.
 
