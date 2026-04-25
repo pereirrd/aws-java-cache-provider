@@ -18,14 +18,14 @@ public final class RedisCacheClientFactory {
 
     static RedisURI toRedisUri(RedisCacheEnvConfig config) {
         var builder = RedisURI.builder()
-                .withHost(config.getHost())
-                .withPort(config.getPort())
-                .withSsl(config.isTls())
-                .withDatabase(config.getDatabase());
+                .withHost(config.host())
+                .withPort(config.port())
+                .withSsl(config.tls())
+                .withDatabase(config.database());
 
-        builder.withTimeout(config.getCommandTimeout());
-        var user = config.getUsername();
-        var pass = config.getPassword();
+        builder.withTimeout(config.commandTimeout());
+        var user = config.username();
+        var pass = config.password();
 
         if (user != null && !user.isBlank()) {
             builder.withAuthentication(user, pass);

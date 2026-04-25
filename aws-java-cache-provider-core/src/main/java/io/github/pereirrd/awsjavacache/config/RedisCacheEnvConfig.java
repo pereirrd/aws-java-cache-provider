@@ -3,12 +3,9 @@ package io.github.pereirrd.awsjavacache.config;
 import io.github.pereirrd.awsjavacache.util.CacheEnvSupport;
 import java.time.Duration;
 import java.util.Map;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
-public class RedisCacheEnvConfig {
+public record RedisCacheEnvConfig(
+        String host, int port, String username, String password, boolean tls, int database, Duration commandTimeout) {
 
     public static final String HOST = "AWS_JAVA_CACHE_REDIS_HOST";
     public static final String PORT = "AWS_JAVA_CACHE_REDIS_PORT";
@@ -17,14 +14,6 @@ public class RedisCacheEnvConfig {
     public static final String TLS = "AWS_JAVA_CACHE_REDIS_TLS";
     public static final String DATABASE = "AWS_JAVA_CACHE_REDIS_DATABASE";
     public static final String TIMEOUT_MS = "AWS_JAVA_CACHE_REDIS_TIMEOUT_MS";
-
-    private final String host;
-    private final int port;
-    private final String username;
-    private final String password;
-    private final boolean tls;
-    private final int database;
-    private final Duration commandTimeout;
 
     public static RedisCacheEnvConfig fromEnvironment() {
         return from(System.getenv());

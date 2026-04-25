@@ -2,8 +2,10 @@ package io.github.pereirrd.awsjavacache.core.impl;
 
 import io.github.pereirrd.awsjavacache.core.CacheProvider;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.SetArgs;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
+import java.time.Duration;
 import java.util.Objects;
 
 public final class RedisCacheProvider implements CacheProvider {
@@ -29,6 +31,20 @@ public final class RedisCacheProvider implements CacheProvider {
     @Override
     public void put(String key, String value) {
         commands.set(key, value);
+    }
+
+    @Override
+    public void put(String key, String value, Duration ttl) {
+        if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+            put(key, value);
+            return;
+        }
+        var millis = ttl.toMillis();
+        if (millis < 1000L) {
+            commands.set(key, value, SetArgs.Builder.px(Math.max(1L, millis)));
+        } else {
+            commands.set(key, value, SetArgs.Builder.ex(ttl.toSeconds()));
+        }
     }
 
     @Override

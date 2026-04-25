@@ -16,16 +16,15 @@ class RedisCacheFactoryTest {
                 RedisCacheEnvConfig.PASSWORD, "only-password");
         var config = RedisCacheEnvConfig.from(env);
         var uri = RedisCacheClientFactory.toRedisUri(config);
-        assertThat(uri.getHost()).isEqualTo(config.getHost());
-        var creds =
-                ((RedisCredentialsProvider.ImmediateRedisCredentialsProvider) uri.getCredentialsProvider())
-                        .resolveCredentialsNow();
-        assertThat(new String(creds.getPassword())).isEqualTo(config.getPassword());
+        assertThat(uri.getHost()).isEqualTo(config.host());
+        var creds = ((RedisCredentialsProvider.ImmediateRedisCredentialsProvider) uri.getCredentialsProvider())
+                .resolveCredentialsNow();
+        assertThat(new String(creds.getPassword())).isEqualTo(config.password());
         assertThat(creds.getUsername()).isNull();
-        assertThat(uri.getPort()).isEqualTo(config.getPort());
-        assertThat(uri.isSsl()).isEqualTo(config.isTls());
-        assertThat(uri.getDatabase()).isEqualTo(config.getDatabase());
-        assertThat(uri.getTimeout()).isEqualTo(config.getCommandTimeout());
+        assertThat(uri.getPort()).isEqualTo(config.port());
+        assertThat(uri.isSsl()).isEqualTo(config.tls());
+        assertThat(uri.getDatabase()).isEqualTo(config.database());
+        assertThat(uri.getTimeout()).isEqualTo(config.commandTimeout());
     }
 
     @Test

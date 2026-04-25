@@ -9,7 +9,7 @@ Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write
 
 ## Compilar
 
-Na raiz do repositório:
+Na raiz do repositório (Maven instalado ou `./mvnw`):
 
 ```bash
 mvn clean verify
@@ -19,6 +19,30 @@ A fase `verify` inclui formatação (Spotless). Para aplicar o formato sem falha
 
 ```bash
 mvn spotless:apply
+```
+
+## Cache-aside (uso programático)
+
+1. Obtenha um `CacheProvider` a partir do `core` (Redis ou Memcached via fábricas / CDI).
+2. Implemente `BackingRepository<ID, M>` na aplicação (JPA, JDBC, cliente HTTP, etc.).
+3. Forneça um `CacheValueSerializer<M>` (por exemplo identidade para `String` com `CacheValueSerializer.utf8Strings()`, ou JSON com Jackson no consumidor).
+4. Instancie `CacheAsideService` com TTL de entrada e uma função `ID → chave de cache`.
+
+```java
+CacheProvider cache = RedisCacheProvider.utf8Strings(RedisCacheClientFactory.fromEnvironment());
+Duration ttl = Duration.ofMinutes(10);
+CacheAsideService<Long, User> service = new CacheAsideService<>(
+    cache,
+    userRepository, // sua implementação de BackingRepository<Long, User>
+    id -> "users:" + id,
+    userSerializer, // CacheValueSerializer<User> (ex.: JSON na aplicação)
+    ttl);
+
+Optional<User> user = service.get(42L);
+// Após gravar no repositório:
+service.evict(42L);
+// ou atualizar o cache explicitamente:
+service.putCached(42L, updatedUser);
 ```
 
 ## Módulos (coordenadas Maven)
