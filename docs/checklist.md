@@ -123,10 +123,10 @@ Todas as subsecções abaixo estão **decididas**; funcionam como contrato de ar
 **Checklist de implementação**
 
 - [ ] `org.testcontainers:testcontainers` + `org.testcontainers:localstack`.
-- [ ] *Endpoint override* nos testes; região fictícia conforme [documentação LocalStack](https://docs.localstack.cloud/).
-- [ ] `docker-compose` (ou equivalente) para dev manual; README com `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, URL do endpoint.
-- [ ] Validar serviços necessários (ElastiCache API, Secrets Manager, …) na edição Community vs Pro.
-- [ ] JUnit 5; AssertJ recomendado.
+- [x] *Endpoint override* via `AwsSdkEnvConfig` / `AwsSdkClientFactory`; região e credenciais por variáveis de ambiente.
+- [x] `docker-compose` + `.env.example` para dev manual; README com `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, URL do endpoint.
+- [x] Serviços LocalStack declarados: ElastiCache API, Secrets Manager, CloudWatch, STS (validar limites Community vs Pro ao escrever testes).
+- [x] JUnit 5; AssertJ recomendado.
 
 > **Nota:** tráfego **Redis/Memcached** (Lettuce/Spymemcached) pode usar endpoint de teste ou o exposto pelo stack; alinhar testes de protocolo ao que for suportado.
 

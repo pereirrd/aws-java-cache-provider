@@ -6,6 +6,54 @@ Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write
 
 - **JDK 25** (definido em `maven.compiler.release` no POM raiz).
 - **Apache Maven** instalado e `JAVA_HOME` apontando para o JDK 25.
+- **Docker** e **Docker Compose** (opcional, para ambiente local com LocalStack).
+
+## Ambiente local (LocalStack)
+
+A infraestrutura local emula APIs AWS de *control plane* (ElastiCache, Secrets Manager, CloudWatch, STS) via **LocalStack** e expõe **Redis** (e opcionalmente **Memcached**) para o tráfego de dados do cache.
+
+1. Copie o ficheiro de variáveis:
+
+```bash
+cp .env.example .env
+```
+
+2. Suba os serviços:
+
+```bash
+docker compose up -d
+```
+
+Para incluir Memcached:
+
+```bash
+docker compose --profile memcached up -d
+```
+
+3. Exporte as variáveis (ou use ferramentas como `direnv` / `source .env` conforme o seu shell).
+
+| Variável | Uso |
+|----------|-----|
+| `AWS_JAVA_CACHE_LOCALSTACK_ENABLED` | `true` para apontar o AWS SDK ao LocalStack |
+| `AWS_JAVA_CACHE_LOCALSTACK_HOST` / `PORT` | Gateway LocalStack (default `localhost:4566`) |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Credenciais (LocalStack aceita `test`/`test`) |
+| `AWS_DEFAULT_REGION` | Região (ex.: `us-east-1`) |
+| `AWS_JAVA_CACHE_AWS_ENDPOINT_URL` | Override explícito do endpoint AWS SDK |
+| `AWS_JAVA_CACHE_REDIS_*` | Endpoint Redis local (`localhost:6379`) |
+
+Na aplicação Java:
+
+```java
+var awsConfig = AwsSdkEnvConfig.fromEnvironment();
+try (var elasticache = AwsSdkClientFactory.elasticache(awsConfig)) {
+    // chamadas ao control plane ElastiCache
+}
+var redis = RedisCacheClientFactory.fromEnvironment();
+```
+
+> **Nota:** `mvn clean verify` continua a usar apenas *stubs* em memória — **não** requer LocalStack. Os testes de integração com LocalStack serão adicionados numa fase posterior.
+
+> **ElastiCache API:** algumas operações podem exigir LocalStack Pro; Secrets Manager e STS funcionam na edição Community.
 
 ## Compilar
 

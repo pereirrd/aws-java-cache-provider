@@ -1,0 +1,50 @@
+services:
+  localstack:
+    image: localstack/localstack:4.4
+    container_name: aws-java-cache-localstack
+    ports:
+      - "${AWS_JAVA_CACHE_LOCALSTACK_PORT:-4566}:4566"
+    environment:
+      SERVICES: ${AWS_JAVA_CACHE_LOCALSTACK_SERVICES:-elasticache,secretsmanager,cloudwatch,sts}
+      DEBUG: ${AWS_JAVA_CACHE_LOCALSTACK_DEBUG:-0}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      PERSISTENCE: ${AWS_JAVA_CACHE_LOCALSTACK_PERSISTENCE:-0}
+    volumes:
+      - ./localstack/init:/etc/localstack/init
+      - localstack-data:/var/lib/localstack
+    env_file:
+      - path: .env
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: aws-java-cache-redis
+    ports:
+      - "${AWS_JAVA_CACHE_REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: aws-java-cache-memcached
+    profiles:
+      - memcached
+    ports:
+      - "${AWS_JAVA_CACHE_MEMCACHED_PORT:-11211}:11211"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo stats | nc 127.0.0.1 11211"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  localstack-data:

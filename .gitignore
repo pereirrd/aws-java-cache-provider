@@ -38,3 +38,6 @@ dependency-reduced-pom.xml
 .project
 .classpath
 .settings/
+
+# Local environment (secrets / machine-specific overrides)
+.env
