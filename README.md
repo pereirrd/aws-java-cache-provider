@@ -67,6 +67,31 @@ Optional<User> user = service.get(42L);
 service.evict(42L);
 ```
 
+## Write-through (uso programático)
+
+1. Obtenha um `CacheProvider` a partir do `core`.
+2. Implemente `BackingRepository<ID, M>` na aplicação.
+3. Forneça `CacheValueSerializer<M>`, função `ID → chave de cache` e `M → ID` (para resolver a chave após `save`).
+4. Instancie `WriteThroughService` — gravações vão **primeiro** à origem e **depois** ao cache; leituras passam pelo cache com carga em *miss*.
+
+```java
+CacheProvider cache = RedisCacheProvider.utf8Strings(RedisCacheClientFactory.fromEnvironment());
+Duration ttl = Duration.ofMinutes(10);
+WriteThroughService<Long, User> service = new WriteThroughService<>(
+    cache,
+    userRepository,
+    id -> "users:" + id,
+    User::getId,
+    userSerializer,
+    ttl);
+
+User saved = service.save(newUser);
+service.deleteById(42L);
+Optional<User> user = service.get(42L);
+```
+
+Se a origem gravar com sucesso mas o cache falhar, o serviço lança `CacheException` — a origem permanece correta; use `evict` ou repita `save` para reconciliar o cache.
+
 ## Módulos (coordenadas Maven)
 
 | Módulo | `artifactId` |
