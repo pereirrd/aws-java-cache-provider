@@ -200,6 +200,31 @@ service.close(); // flush + encerra o processador
 
 **Backpressure:** quando a fila enche, `save` / `deleteById` lançam `CacheException` após o efeito no cache; ajuste `WriteBehindConfig#queueCapacity` ou chame `flush()`.
 
+## Observabilidade (`CacheMetrics`)
+
+Todos os serviços de estratégia aceitam um `CacheMetrics` opcional (default `CacheMetrics.NO_OP`) para *hooks* de hit/miss, carga na origem, `put` e `evict`, com latência por operação.
+
+```java
+CacheMetrics metrics = new CacheMetrics() {
+    @Override
+    public void onCacheHit(String cacheKey, Duration latency) {
+        // ex.: exportar para Micrometer na aplicação
+    }
+
+    @Override
+    public void onCacheMiss(String cacheKey, Duration latency) {
+        // ...
+    }
+};
+
+CacheAsideService<Long, User> service = new CacheAsideService<>(
+    cache, userRepository, id -> "users:" + id, userSerializer, ttl, metrics);
+```
+
+Em *write-behind*, `WriteBehindMetrics` cobre fila e *flush*; `CacheMetrics` cobre operações de leitura/escrita no cache (parâmetro adicional no construtor completo).
+
+Detalhes de TTL por estratégia: [`docs/ttl-por-estrategia.md`](docs/ttl-por-estrategia.md).
+
 ## Módulos (coordenadas Maven)
 
 | Módulo | `artifactId` |

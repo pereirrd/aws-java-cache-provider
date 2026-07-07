@@ -187,8 +187,8 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 - [x] Interfaces: fábrica de conexão (Redis vs Memcached), configuração (endpoints, TLS, timeouts, *pool*).
 - [x] Modelo chave/valor (serialização via `CacheValueSerializer`; limites por engine a documentar no consumidor).
 - [x] Exceções base (`CacheException`; *timeouts* / indisponibilidade a expandir).
-- [ ] Métricas e *hooks* opcionais (hit/miss, latência).
-- [ ] Documentar **TTL** por estratégia (parcial: `CacheProvider#put` com `Duration`, *cache-aside* com TTL por serviço).
+- [x] Métricas e *hooks* opcionais (hit/miss, latência) — `CacheMetrics` em `…-core`, integrado nas estratégias.
+- [x] Documentar **TTL** por estratégia — [`docs/ttl-por-estrategia.md`](ttl-por-estrategia.md).
 
 ---
 

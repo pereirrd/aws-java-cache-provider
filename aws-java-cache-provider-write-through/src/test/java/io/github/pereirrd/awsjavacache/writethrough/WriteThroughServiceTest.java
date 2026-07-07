@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.pereirrd.awsjavacache.api.exception.CacheException;
+import io.github.pereirrd.awsjavacache.api.metrics.CacheMetrics;
 import io.github.pereirrd.awsjavacache.api.repository.BackingRepository;
 import io.github.pereirrd.awsjavacache.api.serialization.CacheValueSerializer;
 import io.github.pereirrd.awsjavacache.core.CacheProvider;
@@ -25,19 +26,22 @@ class WriteThroughServiceTest {
 
     private StubCache cache;
     private StubRepository repository;
+    private RecordingCacheMetrics metrics;
     private WriteThroughService<Long, String> service;
 
     @BeforeEach
     void setUp() {
         cache = new StubCache();
         repository = new StubRepository();
+        metrics = new RecordingCacheMetrics();
         service = new WriteThroughService<>(
                 cache,
                 repository,
                 id -> "user:" + id,
                 entity -> Long.parseLong(entity.split(":")[0]),
                 CacheValueSerializer.utf8Strings(),
-                TTL);
+                TTL,
+                metrics);
     }
 
     @Test
@@ -107,6 +111,18 @@ class WriteThroughServiceTest {
                 .isInstanceOf(CacheException.class)
                 .hasMessage(CACHE_INVALIDATE_AFTER_ORIGIN_DELETE_FAILED);
         assertThat(repository.deleteByIdCount.get()).isEqualTo(1);
+    }
+
+    @Test
+    void save_recordsCachePut() {
+        service.save("10:ivan");
+        assertThat(metrics.putKeys).containsExactly("user:10");
+    }
+
+    @Test
+    void deleteById_recordsCacheEvict() {
+        service.deleteById(11L);
+        assertThat(metrics.evictedKeys).containsExactly("user:11");
     }
 
     @Test
@@ -208,6 +224,22 @@ class WriteThroughServiceTest {
             }
             deleteByIdCount.incrementAndGet();
             lastDeletedId = id;
+        }
+    }
+
+    private static final class RecordingCacheMetrics implements CacheMetrics {
+
+        final List<String> putKeys = new ArrayList<>();
+        final List<String> evictedKeys = new ArrayList<>();
+
+        @Override
+        public void onCachePut(String cacheKey, Duration latency) {
+            putKeys.add(cacheKey);
+        }
+
+        @Override
+        public void onCacheEvict(String cacheKey) {
+            evictedKeys.add(cacheKey);
         }
     }
 }

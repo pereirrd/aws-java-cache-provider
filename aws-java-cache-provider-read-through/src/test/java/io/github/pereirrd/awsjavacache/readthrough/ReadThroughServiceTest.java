@@ -2,6 +2,7 @@ package io.github.pereirrd.awsjavacache.readthrough;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.pereirrd.awsjavacache.api.metrics.CacheMetrics;
 import io.github.pereirrd.awsjavacache.api.repository.BackingRepository;
 import io.github.pereirrd.awsjavacache.api.serialization.CacheValueSerializer;
 import io.github.pereirrd.awsjavacache.core.CacheProvider;
@@ -26,6 +27,7 @@ class ReadThroughServiceTest {
 
     private StubCache cache;
     private StubRepository repository;
+    private RecordingCacheMetrics metrics;
     private ReadThroughService<Long, String> service;
     private ExecutorService executor;
 
@@ -33,8 +35,9 @@ class ReadThroughServiceTest {
     void setUp() {
         cache = new StubCache();
         repository = new StubRepository();
+        metrics = new RecordingCacheMetrics();
         service = new ReadThroughService<>(
-                cache, repository, id -> "user:" + id, CacheValueSerializer.utf8Strings(), TTL);
+                cache, repository, id -> "user:" + id, CacheValueSerializer.utf8Strings(), TTL, metrics);
         executor = Executors.newVirtualThreadPerTaskExecutor();
     }
 
@@ -117,6 +120,27 @@ class ReadThroughServiceTest {
         assertThat(futures.get(2).get()).contains("twenty");
         assertThat(futures.get(3).get()).contains("twenty");
         assertThat(repository.findByIdCount.get()).isEqualTo(2);
+    }
+
+    @Test
+    void get_underConcurrentMiss_recordsSingleOriginLoad() throws Exception {
+        repository.findByIdResult = Optional.of("bob");
+        repository.loadDelayMs = 200;
+        var threadCount = 12;
+        var startGate = new CountDownLatch(1);
+        var futures = new ArrayList<Future<Optional<String>>>();
+        for (var i = 0; i < threadCount; i++) {
+            futures.add(executor.submit(() -> {
+                startGate.await();
+                return service.get(2L);
+            }));
+        }
+        startGate.countDown();
+        for (var future : futures) {
+            assertThat(future.get()).contains("bob");
+        }
+        assertThat(metrics.originLoadKeys).containsExactly("user:2");
+        assertThat(metrics.putKeys).containsExactly("user:2");
     }
 
     @Test
@@ -209,6 +233,22 @@ class ReadThroughServiceTest {
         @Override
         public void deleteById(Long id) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    private static final class RecordingCacheMetrics implements CacheMetrics {
+
+        final List<String> originLoadKeys = new ArrayList<>();
+        final List<String> putKeys = new ArrayList<>();
+
+        @Override
+        public void onOriginLoad(String cacheKey, Duration latency) {
+            originLoadKeys.add(cacheKey);
+        }
+
+        @Override
+        public void onCachePut(String cacheKey, Duration latency) {
+            putKeys.add(cacheKey);
         }
     }
 }
