@@ -240,10 +240,10 @@ Depende de **`…-core`**.
 
 Depende de **`…-core`**.
 
-- [ ] Fila + executor + *batch* para a origem; política de durabilidade da fila documentada.
-- [ ] Idempotência na origem (requisitos ao JPA).
-- [ ] *Backpressure* e métricas.
-- [ ] Testes de carga leve, *shutdown* com *flush*.
+- [x] Fila + executor + *batch* para a origem; política de durabilidade da fila documentada (fila em memória na JVM; perda possível antes de `flush`/`close`).
+- [x] Idempotência na origem (requisitos ao JPA documentados em `WriteBehindTask` / README).
+- [x] *Backpressure* e métricas (`WriteBehindConfig`, `WriteBehindMetrics`, `WriteBehindQueueStats`).
+- [x] Testes de carga leve, *shutdown* com *flush* (`WriteBehindServiceTest`).
 - [ ] Integração: [§ 0.6](#06-testes-e-ambiente-local-decidido).
 
 ---
@@ -252,7 +252,7 @@ Depende de **`…-core`**.
 
 ## Fase 8 — Release e documentação
 
-- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (*read-through* e *write-through* documentados; *write-behind* por fazer).
+- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (*read-through*, *write-through* e *write-behind* documentados).
 - [x] CI: `mvn verify`, JDK 25, cache Maven (GitHub Actions).
 - [ ] Versionamento semântico; Maven Central / GitHub Packages; `distributionManagement`.
 - [ ] Segurança: OWASP Dependency-Check / Dependabot.
