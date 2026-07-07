@@ -136,11 +136,18 @@ docker compose down      # para containers
 docker compose down -v   # remove volumes (incl. dados LocalStack)
 ```
 
-## Próximos passos (fora desta etapa)
+## Testes de integração
 
-- [ ] Dependências Testcontainers (`testcontainers`, `localstack` module)
-- [ ] Testes de integração Maven (profile `integration` ou Failsafe) que subam a stack automaticamente
+Perfis Maven, comandos, configuração do `.env`, validação da stack e guia para agentes de IA
+(sem permissão Docker API): **[`docs/integration-tests.md`](integration-tests.md)**.
+
+## Estado da implementação
+
+- [x] Dependências Testcontainers (`testcontainers-junit-jupiter`, `testcontainers-localstack`)
+- [x] Profile `integration` — Testcontainers + Failsafe (`*IT.java`)
+- [x] Profile `integration-compose` — stack `docker compose` + Failsafe (`*ComposeIT.java`)
 - [ ] Testes ElastiCache API apenas com LocalStack Pro ou em CI dedicado
+- [ ] CI opcional: job com `-Pintegration` ou `-Pintegration-compose`
 
-A etapa atual (**infraestrutura + configuração por env**) está concluída; `mvn clean verify` **não**
-depende de Docker.
+`mvn clean verify` **não** depende de Docker. Integração: `-Pintegration-compose` (stack no ar) ou
+`-Pintegration` (Docker API).

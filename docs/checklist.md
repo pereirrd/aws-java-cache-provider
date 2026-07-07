@@ -18,6 +18,7 @@ Marque `[x]` nas listas de tarefas conforme for concluindo.
 |--------|------------|
 | [Fase 0](#fase-0) | Decisões § 0.1–0.6 (produto, stack, módulos, testes) |
 | [LocalStack](localstack.md) | Infraestrutura local, Community vs Pro, validação |
+| [Testes de integração](integration-tests.md) | Perfis Maven, compose, guia IA/Docker |
 | [Fase 1](#fase-1) | POM, tooling, dependências |
 | [Fase 2](#fase-2) | API comum no `…-core` |
 | [Fase 3](#fase-3) | Contrato CRUD genérico |
@@ -123,7 +124,7 @@ Todas as subsecções abaixo estão **decididas**; funcionam como contrato de ar
 
 **Checklist de implementação**
 
-- [ ] `org.testcontainers:testcontainers` + `org.testcontainers:localstack` (próxima fase: testes de integração).
+- [x] `org.testcontainers:testcontainers-junit-jupiter` + `org.testcontainers:testcontainers-localstack` (profile Maven `integration`).
 - [x] *Endpoint override* via `AwsSdkEnvConfig` / `AwsSdkClientFactory`; região e credenciais por variáveis de ambiente.
 - [x] `docker-compose` + `.env.example` para dev manual; README com `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, URL do endpoint.
 - [x] Serviços LocalStack declarados e **validados** (Secrets Manager, STS, CloudWatch em Community; ElastiCache API documentada como **Pro only** — ver [`docs/localstack.md`](localstack.md)).
@@ -214,7 +215,7 @@ Depende de **`…-core`**. [§ 0.5](#05-estrutura-modular-da-biblioteca-decidido
 - [ ] **Anotações** Java (chave, TTL, id de cache); processamento em runtime opcional / na app ([§ 0.3](#03-stack-core-puro-java-e-aws-decidido)).
 - [x] API de invalidação/atualização explícita (`evict`, `putCached`; README).
 - [x] Testes unitários (dublês de `CacheProvider` + repositório).
-- [ ] Testes de integração: [§ 0.6](#06-testes-e-ambiente-local-decidido).
+- [x] Testes de integração: [§ 0.6](#06-testes-e-ambiente-local-decidido) (`mvn verify -Pintegration` no `…-core` e `…-cache-aside`).
 
 ---
 
