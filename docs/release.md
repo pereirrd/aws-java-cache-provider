@@ -1,6 +1,17 @@
 # Release e versionamento
 
-Este documento descreve a política de versões da biblioteca **aws-java-cache-provider** e o que falta para publicar artefactos Maven num repositório remoto.
+Este documento descreve a política de versões da biblioteca **aws-java-cache-provider** e o encerramento do projecto como experiência educativa.
+
+## Finalização do projecto
+
+A implementação foi **concluída** (fases 0–7 do [`checklist.md`](checklist.md)): quatro estratégias de cache, núcleo Redis/Memcached, módulo JPA de exemplo, anotações *cache-aside*, métricas opcionais e testes de integração com LocalStack/Redis.
+
+| Contexto | Detalhe |
+|----------|---------|
+| **Objectivo** | Projeto **educativo** — experimento com subagentes do Cursor, coordenação via **agents na interface web** (incluindo uso pelo **celular**) e desenvolvimento guiado por especificação (*spec-driven*) |
+| **Validação** | Testes unitários e de integração demonstram comportamento funcional; **não** há histórico de uso em produção com escalabilidade, carga prolongada nem métricas de consumo de recursos |
+| **Produção** | Para aplicações reais, preferir **Spring Boot** ou **Micronaut** e os respectivos *cache providers* maduros (ver aviso no [README](../README.md)) |
+| **Publicação** | Artefactos **não** são publicados; versão permanece `0.1.0-SNAPSHOT` |
 
 ## Versionamento semântico
 
@@ -58,8 +69,8 @@ Nenhum destes passos está implementado; a Fase 8 do [`checklist.md`](checklist.
 
 ## Checklist antes de `1.0.0`
 
-- [ ] `mvn clean verify` verde (unitários + Spotless).
-- [ ] Testes de integração documentados passam com stack local ([`integration-tests.md`](integration-tests.md)).
-- [ ] README com coordenadas Maven finais e matriz de módulos.
-- [ ] CHANGELOG ou notas de release na *tag*.
-- [ ] Remover `-SNAPSHOT` e publicar (quando infra de *deploy* existir).
+- [x] `mvn clean verify` verde (unitários + Spotless).
+- [x] Testes de integração documentados passam com stack local ([`integration-tests.md`](integration-tests.md)).
+- [x] README com coordenadas Maven e matriz de módulos.
+- [ ] CHANGELOG ou notas de release na *tag* (se houver *tag* futura).
+- [ ] Remover `-SNAPSHOT` e publicar — **não previsto** (projecto educativo, sem *deploy*).
