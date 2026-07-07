@@ -226,7 +226,7 @@ Depende de **`…-core`**.
 - [x] Leitura só via cache; *loader* em *miss* (estilo *LoadingCache*).
 - [x] Uma carga por chave sob concorrência (*single loader* / *lock*).
 - [x] Testes de concorrência.
-- [ ] Integração: [§ 0.6](#06-testes-e-ambiente-local-decidido).
+- [x] Integração: [§ 0.6](#06-testes-e-ambiente-local-decidido) (`ReadThroughServiceComposeIT`).
 
 ---
 
@@ -235,7 +235,7 @@ Depende de **`…-core`**.
 Depende de **`…-core`**.
 
 - [x] Escrita coordenada: origem (JPA/CRUD) + cache; definir ordem e falha parcial.
-- [x] Testes com repositório fake + [§ 0.6](#06-testes-e-ambiente-local-decidido) (integração LocalStack pendente).
+- [x] Testes com repositório fake + [§ 0.6](#06-testes-e-ambiente-local-decidido) (`WriteThroughServiceComposeIT`).
 
 ---
 
@@ -247,7 +247,7 @@ Depende de **`…-core`**.
 - [x] Idempotência na origem (requisitos ao JPA documentados em `WriteBehindTask` / README).
 - [x] *Backpressure* e métricas (`WriteBehindConfig`, `WriteBehindMetrics`, `WriteBehindQueueStats`).
 - [x] Testes de carga leve, *shutdown* com *flush* (`WriteBehindServiceTest`).
-- [ ] Integração: [§ 0.6](#06-testes-e-ambiente-local-decidido).
+- [x] Integração: [§ 0.6](#06-testes-e-ambiente-local-decidido) (`WriteBehindServiceComposeIT`).
 
 ---
 

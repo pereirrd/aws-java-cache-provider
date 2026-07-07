@@ -2,6 +2,7 @@ services:
   localstack:
     image: localstack/localstack:4.4
     container_name: aws-java-cache-localstack
+    restart: "no"
     ports:
       - "${AWS_JAVA_CACHE_LOCALSTACK_PORT:-4566}:4566"
     environment:
@@ -26,6 +27,7 @@ services:
   redis:
     image: redis:7.4-alpine
     container_name: aws-java-cache-redis
+    restart: "no"
     ports:
       - "${AWS_JAVA_CACHE_REDIS_PORT:-6379}:6379"
     healthcheck:
@@ -37,6 +39,7 @@ services:
   memcached:
     image: memcached:1.6-alpine
     container_name: aws-java-cache-memcached
+    restart: "no"
     profiles:
       - memcached
     ports:
