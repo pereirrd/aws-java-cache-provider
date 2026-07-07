@@ -12,7 +12,7 @@ Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write
 
 A infraestrutura local emula APIs AWS de *control plane* (Secrets Manager, CloudWatch, STS; ElastiCache API com **LocalStack Pro**) via **LocalStack**, e expõe **Redis** (e opcionalmente **Memcached**) para o tráfego de **dados** do cache.
 
-Documentação completa: [`docs/localstack.md`](docs/localstack.md) (arquitetura, matriz Community vs Pro, validação).
+Documentação completa: [`docs/localstack.md`](docs/localstack.md) (arquitetura, matriz Community vs Pro) e [`docs/integration-tests.md`](docs/integration-tests.md) (perfis Maven, compose, guia para IA).
 
 1. Copie o ficheiro de variáveis:
 
@@ -63,7 +63,8 @@ try (var secrets = AwsSdkClientFactory.secretsManager(awsConfig)) {
 var redis = RedisCacheClientFactory.fromEnvironment();
 ```
 
-> **Nota:** `mvn clean verify` continua a usar apenas *stubs* em memória — **não** requer LocalStack. Testes de integração automatizados com Testcontainers ficam para a fase seguinte.
+> **Nota:** `mvn clean verify` continua a usar apenas *stubs* em memória — **não** requer Docker.
+> Testes de integração: ver [`docs/integration-tests.md`](docs/integration-tests.md).
 
 > **ElastiCache API:** na edição **Community** do LocalStack 4.4 a API não está emulada (`DescribeCacheClusters` falha). Para *control plane* ElastiCache use **LocalStack Pro**; para desenvolvimento local do cache use o container **Redis** do `docker-compose`.
 
@@ -79,6 +80,21 @@ A fase `verify` inclui formatação (Spotless). Para aplicar o formato sem falha
 
 ```bash
 mvn spotless:apply
+```
+
+### Testes de integração
+
+Resumo (detalhes em [`docs/integration-tests.md`](docs/integration-tests.md)):
+
+```bash
+# Stack manual + testes (recomendado se Docker API indisponível — ex.: agente IA)
+docker compose up -d
+set -a && source .env && set +a
+mvn clean verify -Pintegration-compose
+
+# Testcontainers (requer docker ps sem permission denied)
+set -a && source .env && set +a
+mvn clean verify -Pintegration
 ```
 
 ## Cache-aside (uso programático)
