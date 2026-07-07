@@ -47,10 +47,16 @@ do `docker-compose` com as variáveis `AWS_JAVA_CACHE_REDIS_*` / `AWS_JAVA_CACHE
 cp .env.example .env
 ```
 
-2. Suba a stack:
+2. Suba a stack **manualmente** quando precisar (não arranca sozinha ao iniciar o WSL/Docker):
 
 ```bash
 docker compose up -d
+```
+
+Os serviços usam `restart: "no"` — só sobem com `docker compose up`. Para parar:
+
+```bash
+docker compose down
 ```
 
 Memcached (opcional):

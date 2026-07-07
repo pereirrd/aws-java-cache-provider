@@ -35,7 +35,19 @@ ver [`localstack.md`](localstack.md).
 
 - `CacheAsideServiceComposeIT` — miss, hit, evict com Redis real
 
-Total: **9 testes** de integração compose (6 no core + 3 no cache-aside).
+**Read-through (`integration-compose`):**
+
+- `ReadThroughServiceComposeIT` — miss, hit, evict com Redis real
+
+**Write-through (`integration-compose`):**
+
+- `WriteThroughServiceComposeIT` — save origem→cache, hit, delete origem→invalidação
+
+**Write-behind (`integration-compose`):**
+
+- `WriteBehindServiceComposeIT` — save cache→flush origem, hit, delete cache→flush origem
+
+Total: **18 testes** de integração compose (6 no core + 3 por módulo de estratégia).
 
 ---
 
@@ -172,7 +184,7 @@ acessível, os testes `*IT.java` são **skipped** (não falham o build).
 ### Apenas módulos com integração
 
 ```bash
-mvn verify -Pintegration-compose -pl aws-java-cache-provider-core,aws-java-cache-provider-cache-aside
+mvn verify -Pintegration-compose -pl aws-java-cache-provider-core,aws-java-cache-provider-cache-aside,aws-java-cache-provider-read-through,aws-java-cache-provider-write-through,aws-java-cache-provider-write-behind
 ```
 
 ---
