@@ -212,7 +212,7 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 Depende de **`…-core`**. [§ 0.5](#05-estrutura-modular-da-biblioteca-decidido).
 
 - [x] Fluxo: `get` → *miss* → `BackingRepository#findById` → `put` com TTL (`CacheAsideService`).
-- [ ] **Anotações** Java (chave, TTL, id de cache); processamento em runtime opcional / na app ([§ 0.3](#03-stack-core-puro-java-e-aws-decidido)).
+- [x] **Anotações** Java (chave, TTL, id de cache); processamento em runtime opcional / na app ([§ 0.3](#03-stack-core-puro-java-e-aws-decidido)).
 - [x] API de invalidação/atualização explícita (`evict`, `putCached`; README).
 - [x] Testes unitários (dublês de `CacheProvider` + repositório).
 - [x] Testes de integração: [§ 0.6](#06-testes-e-ambiente-local-decidido) (`mvn verify -Pintegration` no `…-core` e `…-cache-aside`).

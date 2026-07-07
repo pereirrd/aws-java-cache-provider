@@ -54,6 +54,21 @@ public final class CacheAsideService<ID, M> {
         this.metrics = Objects.requireNonNull(metrics, "metrics");
     }
 
+    /**
+     * Builds a cache-aside service from annotations on {@code entityClass} ({@code @CacheRegion},
+     * {@code @CacheKey}, {@code @CacheTtl}, {@code @CacheId} / {@code jakarta.persistence.Id}).
+     */
+    @SuppressWarnings("unchecked")
+    public static <ID, M> CacheAsideService<ID, M> fromAnnotations(
+            CacheProvider cacheProvider,
+            BackingRepository<ID, M> repository,
+            Class<M> entityClass,
+            CacheValueSerializer<M> serializer) {
+        var metadata = (CacheAsideMetadata<ID>) CacheAsideAnnotationResolver.resolve(entityClass);
+        return new CacheAsideService<>(
+                cacheProvider, repository, metadata.cacheKeyForId(), serializer, metadata.entryTtl());
+    }
+
     public Optional<M> get(ID id) {
         Objects.requireNonNull(id, CACHE_ID_REQUIRED);
         var key = requireKey(cacheKeyForId.apply(id));

@@ -121,6 +121,42 @@ service.evict(42L);
 service.putCached(42L, updatedUser);
 ```
 
+## Cache-aside (anotações)
+
+Para evitar repetir função de chave e TTL no código, declare metadados na classe da entidade e use
+`CacheAsideAnnotationResolver` ou `CacheAsideService.fromAnnotations`. Não há AOP nem bytecode weaving: a
+aplicação invoca o resolver explicitamente ([§ 0.3](docs/checklist.md#03-stack-core-puro-java-e-aws-decidido)).
+
+| Anotação | Onde | Função |
+|----------|------|--------|
+| `@CacheRegion` / `@CacheName` | classe | namespace (ex.: `"users"` → chave `users:{id}`) |
+| `@CacheKey` | classe, campo ou getter | template com `{id}` na classe; marca o identificador no campo/getter |
+| `@CacheTtl` | classe ou campo id | TTL de entrada (`value` + `unit`, default 5 minutos) |
+| `@CacheId` | campo ou getter | identificador quando não há `jakarta.persistence.Id` |
+
+```java
+@CacheRegion("users")
+@CacheTtl(value = 10, unit = TimeUnit.MINUTES)
+public class User {
+    @CacheId
+    private Long id;
+    private String name;
+    // getters...
+}
+
+CacheAsideService<Long, User> service = CacheAsideService.fromAnnotations(
+    cache, userRepository, User.class, userSerializer);
+
+// Ou só metadados (chave + TTL + extrator de id):
+@SuppressWarnings("unchecked")
+CacheAsideMetadata<Long> metadata =
+    (CacheAsideMetadata<Long>) CacheAsideAnnotationResolver.resolve(User.class);
+String key = metadata.cacheKeyForId().apply(42L); // "users:42"
+```
+
+Com template explícito: `@CacheKey("profile:{id}")` na classe. O resolver também reconhece
+`jakarta.persistence.Id` via reflexão (sem dependência JPA no módulo cache-aside).
+
 ## Read-through (uso programático)
 
 1. Obtenha um `CacheProvider` a partir do `core` (Redis ou Memcached via fábricas / CDI).
