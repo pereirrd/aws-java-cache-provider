@@ -17,7 +17,7 @@ cache strategies (cache-aside, read-through, write-through, write-behind) over A
 - Build + tests only (no lint): `mvn clean package`.
 - Lint only: `mvn spotless:check`; auto-fix formatting with `mvn spotless:apply`.
 - Tests use JUnit 5 + AssertJ with in-memory stubs — **no Redis/Memcached/AWS/LocalStack needed** for `mvn clean verify`.
-- Optional local AWS emulation: `cp .env.example .env` then `docker compose up -d` (LocalStack + Redis). See README § *Ambiente local (LocalStack)*. Integration tests against LocalStack are not wired yet.
+- Optional local AWS emulation: `cp .env.example .env` then `docker compose up -d` (LocalStack + Redis). See [`docs/localstack.md`](docs/localstack.md). Stack validated manually; automated Testcontainers tests are a future phase. ElastiCache API requires LocalStack Pro; use the Redis container for data-plane dev on Community.
 
 ### Non-obvious notes
 - Spotless uses palantir-java-format and enforces trailing-whitespace/import rules; a formatting

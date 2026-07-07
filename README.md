@@ -10,7 +10,9 @@ Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write
 
 ## Ambiente local (LocalStack)
 
-A infraestrutura local emula APIs AWS de *control plane* (ElastiCache, Secrets Manager, CloudWatch, STS) via **LocalStack** e expõe **Redis** (e opcionalmente **Memcached**) para o tráfego de dados do cache.
+A infraestrutura local emula APIs AWS de *control plane* (Secrets Manager, CloudWatch, STS; ElastiCache API com **LocalStack Pro**) via **LocalStack**, e expõe **Redis** (e opcionalmente **Memcached**) para o tráfego de **dados** do cache.
+
+Documentação completa: [`docs/localstack.md`](docs/localstack.md) (arquitetura, matriz Community vs Pro, validação).
 
 1. Copie o ficheiro de variáveis:
 
@@ -41,19 +43,29 @@ docker compose --profile memcached up -d
 | `AWS_JAVA_CACHE_AWS_ENDPOINT_URL` | Override explícito do endpoint AWS SDK |
 | `AWS_JAVA_CACHE_REDIS_*` | Endpoint Redis local (`localhost:6379`) |
 
+Validação rápida:
+
+```bash
+curl -s http://localhost:4566/_localstack/health
+docker exec aws-java-cache-redis redis-cli ping
+docker exec aws-java-cache-localstack awslocal secretsmanager get-secret-value \
+  --secret-id aws-java-cache/local/redis-password
+```
+
 Na aplicação Java:
 
 ```java
 var awsConfig = AwsSdkEnvConfig.fromEnvironment();
-try (var elasticache = AwsSdkClientFactory.elasticache(awsConfig)) {
-    // chamadas ao control plane ElastiCache
+try (var secrets = AwsSdkClientFactory.secretsManager(awsConfig)) {
+    // Secrets Manager, STS, CloudWatch — OK em Community
 }
+// ElastiCache API: requer LocalStack Pro (ver docs/localstack.md)
 var redis = RedisCacheClientFactory.fromEnvironment();
 ```
 
-> **Nota:** `mvn clean verify` continua a usar apenas *stubs* em memória — **não** requer LocalStack. Os testes de integração com LocalStack serão adicionados numa fase posterior.
+> **Nota:** `mvn clean verify` continua a usar apenas *stubs* em memória — **não** requer LocalStack. Testes de integração automatizados com Testcontainers ficam para a fase seguinte.
 
-> **ElastiCache API:** algumas operações podem exigir LocalStack Pro; Secrets Manager e STS funcionam na edição Community.
+> **ElastiCache API:** na edição **Community** do LocalStack 4.4 a API não está emulada (`DescribeCacheClusters` falha). Para *control plane* ElastiCache use **LocalStack Pro**; para desenvolvimento local do cache use o container **Redis** do `docker-compose`.
 
 ## Compilar
 

@@ -17,6 +17,7 @@ Marque `[x]` nas listas de tarefas conforme for concluindo.
 | Secção | Conteúdo |
 |--------|------------|
 | [Fase 0](#fase-0) | Decisões § 0.1–0.6 (produto, stack, módulos, testes) |
+| [LocalStack](localstack.md) | Infraestrutura local, Community vs Pro, validação |
 | [Fase 1](#fase-1) | POM, tooling, dependências |
 | [Fase 2](#fase-2) | API comum no `…-core` |
 | [Fase 3](#fase-3) | Contrato CRUD genérico |
@@ -122,10 +123,11 @@ Todas as subsecções abaixo estão **decididas**; funcionam como contrato de ar
 
 **Checklist de implementação**
 
-- [ ] `org.testcontainers:testcontainers` + `org.testcontainers:localstack`.
+- [ ] `org.testcontainers:testcontainers` + `org.testcontainers:localstack` (próxima fase: testes de integração).
 - [x] *Endpoint override* via `AwsSdkEnvConfig` / `AwsSdkClientFactory`; região e credenciais por variáveis de ambiente.
 - [x] `docker-compose` + `.env.example` para dev manual; README com `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, URL do endpoint.
-- [x] Serviços LocalStack declarados: ElastiCache API, Secrets Manager, CloudWatch, STS (validar limites Community vs Pro ao escrever testes).
+- [x] Serviços LocalStack declarados e **validados** (Secrets Manager, STS, CloudWatch em Community; ElastiCache API documentada como **Pro only** — ver [`docs/localstack.md`](localstack.md)).
+- [x] Documentação de infraestrutura local e limites Community vs Pro.
 - [x] JUnit 5; AssertJ recomendado.
 
 > **Nota:** tráfego **Redis/Memcached** (Lettuce/Spymemcached) pode usar endpoint de teste ou o exposto pelo stack; alinhar testes de protocolo ao que for suportado.
