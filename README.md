@@ -45,6 +45,28 @@ service.evict(42L);
 service.putCached(42L, updatedUser);
 ```
 
+## Read-through (uso programático)
+
+1. Obtenha um `CacheProvider` a partir do `core` (Redis ou Memcached via fábricas / CDI).
+2. Implemente `BackingRepository<ID, M>` na aplicação.
+3. Forneça um `CacheValueSerializer<M>`.
+4. Instancie `ReadThroughService` — todas as leituras passam por ele; em *miss* o serviço carrega da origem com *single-flight* por chave.
+
+```java
+CacheProvider cache = RedisCacheProvider.utf8Strings(RedisCacheClientFactory.fromEnvironment());
+Duration ttl = Duration.ofMinutes(10);
+ReadThroughService<Long, User> service = new ReadThroughService<>(
+    cache,
+    userRepository,
+    id -> "users:" + id,
+    userSerializer,
+    ttl);
+
+Optional<User> user = service.get(42L);
+// Após gravar no repositório:
+service.evict(42L);
+```
+
 ## Módulos (coordenadas Maven)
 
 | Módulo | `artifactId` |

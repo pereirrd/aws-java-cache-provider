@@ -1,4 +1,4 @@
-package io.github.pereirrd.awsjavacache.cacheaside;
+package io.github.pereirrd.awsjavacache.readthrough;
 
 import static io.github.pereirrd.awsjavacache.constants.CacheErrorMessages.CACHE_ID_REQUIRED;
 import static io.github.pereirrd.awsjavacache.constants.CacheErrorMessages.CACHE_KEY_REQUIRED;
@@ -9,25 +9,29 @@ import io.github.pereirrd.awsjavacache.core.CacheProvider;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * Cache-aside reads: cache first, then {@link BackingRepository#findById(Object)} on miss, then populate cache.
- * Writes to the origin remain the application's responsibility; use {@link #evict(Object)} or {@link #putCached(Object, Object)}
- * after mutations.
+ * Read-through reads: callers interact only with this service for lookups. On cache miss the loader
+ * ({@link BackingRepository#findById(Object)}) runs inside the cache layer, populates the entry, and returns
+ * the value. Concurrent misses for the same key coalesce to a single load (*single-flight*).
+ *
+ * <p>Writes to the origin remain the application's responsibility; call {@link #evict(Object)} after mutations.
  *
  * @param <ID> identifier type
  * @param <M> model type stored in cache and repository
  */
-public final class CacheAsideService<ID, M> {
+public final class ReadThroughService<ID, M> {
 
     private final CacheProvider cacheProvider;
     private final BackingRepository<ID, M> repository;
     private final Function<ID, String> cacheKeyForId;
     private final CacheValueSerializer<M> serializer;
     private final Duration entryTtl;
+    private final ConcurrentHashMap<String, Object> loadLocks = new ConcurrentHashMap<>();
 
-    public CacheAsideService(
+    public ReadThroughService(
             CacheProvider cacheProvider,
             BackingRepository<ID, M> repository,
             Function<ID, String> cacheKeyForId,
@@ -40,6 +44,9 @@ public final class CacheAsideService<ID, M> {
         this.entryTtl = Objects.requireNonNull(entryTtl, "entryTtl");
     }
 
+    /**
+     * Returns the value for {@code id}, loading through the cache on miss.
+     */
     public Optional<M> get(ID id) {
         Objects.requireNonNull(id, CACHE_ID_REQUIRED);
         var key = requireKey(cacheKeyForId.apply(id));
@@ -47,24 +54,31 @@ public final class CacheAsideService<ID, M> {
         if (cached != null) {
             return Optional.of(serializer.deserialize(cached));
         }
-        var loaded = repository.findById(id);
-        loaded.ifPresent(entity -> cacheProvider.put(key, serializer.serialize(entity), entryTtl));
-
-        return loaded;
+        return loadAndCache(key, id);
     }
 
+    /** Removes the cached entry for {@code id} after the backing store was updated or deleted. */
     public void evict(ID id) {
         Objects.requireNonNull(id, CACHE_ID_REQUIRED);
         var key = requireKey(cacheKeyForId.apply(id));
         cacheProvider.invalidate(key);
     }
 
-    /** After updating the backing store, store the fresh value in the cache (optional cache-aside write path). */
-    public void putCached(ID id, M value) {
-        Objects.requireNonNull(id, CACHE_ID_REQUIRED);
-        Objects.requireNonNull(value, "value");
-        var key = requireKey(cacheKeyForId.apply(id));
-        cacheProvider.put(key, serializer.serialize(value), entryTtl);
+    private Optional<M> loadAndCache(String key, ID id) {
+        var lock = loadLocks.computeIfAbsent(key, ignored -> new Object());
+        synchronized (lock) {
+            try {
+                var cachedAfterLock = cacheProvider.get(key);
+                if (cachedAfterLock != null) {
+                    return Optional.of(serializer.deserialize(cachedAfterLock));
+                }
+                var loaded = repository.findById(id);
+                loaded.ifPresent(entity -> cacheProvider.put(key, serializer.serialize(entity), entryTtl));
+                return loaded;
+            } finally {
+                loadLocks.remove(key, lock);
+            }
+        }
     }
 
     private static String requireKey(String key) {

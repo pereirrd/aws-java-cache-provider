@@ -220,9 +220,9 @@ Depende de **`…-core`**. [§ 0.5](#05-estrutura-modular-da-biblioteca-decidido
 
 Depende de **`…-core`**.
 
-- [ ] Leitura só via cache; *loader* em *miss* (estilo *LoadingCache*).
-- [ ] Uma carga por chave sob concorrência (*single loader* / *lock*).
-- [ ] Testes de concorrência.
+- [x] Leitura só via cache; *loader* em *miss* (estilo *LoadingCache*).
+- [x] Uma carga por chave sob concorrência (*single loader* / *lock*).
+- [x] Testes de concorrência.
 - [ ] Integração: [§ 0.6](#06-testes-e-ambiente-local-decidido).
 
 ---
@@ -252,7 +252,7 @@ Depende de **`…-core`**.
 
 ## Fase 8 — Release e documentação
 
-- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (outras estratégias: exemplos por fazer).
+- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (outras estratégias: *read-through* documentado; *write-through* / *write-behind* por fazer).
 - [x] CI: `mvn verify`, JDK 25, cache Maven (GitHub Actions).
 - [ ] Versionamento semântico; Maven Central / GitHub Packages; `distributionManagement`.
 - [ ] Segurança: OWASP Dependency-Check / Dependabot.
