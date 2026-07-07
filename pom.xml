@@ -30,6 +30,7 @@
     <module>aws-java-cache-provider-read-through</module>
     <module>aws-java-cache-provider-write-through</module>
     <module>aws-java-cache-provider-write-behind</module>
+    <module>aws-java-cache-provider-jpa</module>
   </modules>
 
   <properties>
@@ -42,6 +43,8 @@
     <jakarta.persistence.version>3.2.0</jakarta.persistence.version>
     <jakarta.inject.version>2.0.1</jakarta.inject.version>
     <jakarta.cdi.version>4.1.0</jakarta.cdi.version>
+    <hibernate.version>6.6.4.Final</hibernate.version>
+    <h2.version>2.3.232</h2.version>
 
     <junit.jupiter.version>5.11.4</junit.jupiter.version>
     <assertj.version>3.27.3</assertj.version>
@@ -113,6 +116,22 @@
         <groupId>io.github.pereirrd.awsjavacache</groupId>
         <artifactId>aws-java-cache-provider-write-behind</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.pereirrd.awsjavacache</groupId>
+        <artifactId>aws-java-cache-provider-jpa</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate.orm</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
       </dependency>
 
       <dependency>

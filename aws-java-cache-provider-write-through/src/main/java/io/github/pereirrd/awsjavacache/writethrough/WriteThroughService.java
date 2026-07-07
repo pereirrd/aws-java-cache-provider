@@ -24,6 +24,10 @@ import java.util.function.Function;
  * {@link #deleteById(Object)} removes from the origin first, then invalidates the cache entry. Reads use the cache with
  * origin load on miss (*single-flight* per key).
  *
+ * <p><strong>Order:</strong> origin ({@link BackingRepository}) always before cache on writes. Transaction demarcation
+ * ({@code @Transactional}, JTA, etc.) belongs in the <strong>application</strong> layer wrapping {@link #save} /
+ * {@link #deleteById}; this service does not manage persistence transactions. See {@code docs/contrato-transacional.md}.
+ *
  * <p><strong>Partial failure policy:</strong> origin operations run before cache side-effects. If the origin succeeds and
  * the cache step fails, a {@link CacheException} is thrown and the cache entry may be stale until {@link #evict(Object)}
  * or a successful {@link #save(Object)}.

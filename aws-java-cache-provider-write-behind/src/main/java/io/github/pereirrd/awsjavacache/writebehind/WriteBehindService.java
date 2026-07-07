@@ -36,9 +36,16 @@ import java.util.function.Function;
  * asynchronous persistence to the backing store. Reads use the cache with origin load on miss (*single-flight* per
  * key).
  *
+ * <p><strong>Async origin:</strong> after {@link #save} / {@link #deleteById} return, the cache reflects the new state
+ * but the backing store is updated later on a background thread. The cache may be <strong>ahead</strong> of the origin
+ * until the queue drains. Transaction boundaries and idempotent {@link BackingRepository} implementations are the
+ * consumer's responsibility — see {@code docs/contrato-transacional.md}.
+ *
+ * <p><strong>Idempotency:</strong> {@link BackingRepository#save(Object)} and {@link BackingRepository#deleteById(Object)}
+ * must tolerate duplicate drains (safe upsert; delete is no-op when already absent).
+ *
  * <p><strong>Durability:</strong> the pending-write queue is in-memory only. Call {@link #flush()} or {@link #close()}
- * before shutdown to drain pending operations. Origin {@link BackingRepository} implementations should be
- * <strong>idempotent</strong> because retries after partial failures may replay operations.
+ * before shutdown to drain pending operations.
  *
  * <p><strong>Backpressure:</strong> when the queue is full, {@link #save(Object)} and {@link #deleteById(Object)} throw
  * {@link CacheException} after updating the cache (the cache may be ahead of the origin until space is available and

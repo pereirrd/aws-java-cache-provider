@@ -200,8 +200,8 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 - [x] Formalizar interface CRUD `<ID, M>` (`BackingRepository` em `…core`: `findById`, `save`, `deleteById`); **sem** `EntityManager` na API pública.
 - [x] Documentar implementação pelo consumidor (README *cache-aside*; JPA/Spring Data na app).
-- [ ] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app** (*write-through*: ordem origem→cache documentada).
-- [ ] Testes de integração BD (H2 / Testcontainers PostgreSQL/MySQL) **só** no módulo JPA.
+- [x] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app** (*write-through*: ordem origem→cache documentada) — [`docs/contrato-transacional.md`](contrato-transacional.md).
+- [x] Testes de integração BD (H2 / Testcontainers PostgreSQL/MySQL) **só** no módulo JPA (`…-jpa`, H2 em `JpaBackingRepositoryIT`).
 
 ---
 
