@@ -1,8 +1,10 @@
 package io.github.pereirrd.awsjavacache.integration;
 
 import io.github.pereirrd.awsjavacache.config.AwsSdkEnvConfig;
+import io.github.pereirrd.awsjavacache.config.MemcachedCacheEnvConfig;
 import io.github.pereirrd.awsjavacache.config.RedisCacheEnvConfig;
 import io.github.pereirrd.awsjavacache.factory.AwsSdkClientFactory;
+import io.github.pereirrd.awsjavacache.factory.MemcachedCacheClientFactory;
 import io.github.pereirrd.awsjavacache.factory.RedisCacheClientFactory;
 
 /**
@@ -28,12 +30,20 @@ public final class ComposeIntegrationSupport {
         return isRedisReachable();
     }
 
+    public static boolean isMemcachedAvailable() {
+        return isMemcachedReachable();
+    }
+
     public static AwsSdkEnvConfig awsConfigFromEnvironment() {
         return AwsSdkEnvConfig.fromEnvironment();
     }
 
     public static RedisCacheEnvConfig redisConfigFromEnvironment() {
         return RedisCacheEnvConfig.fromEnvironment();
+    }
+
+    public static MemcachedCacheEnvConfig memcachedConfigFromEnvironment() {
+        return MemcachedCacheEnvConfig.fromEnvironment();
     }
 
     private static boolean isLocalStackReachable() {
@@ -76,6 +86,38 @@ public final class ComposeIntegrationSupport {
                 }
             }
         } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private static boolean isMemcachedReachable() {
+        if (System.getenv(MemcachedCacheEnvConfig.Keys.NODES) == null) {
+            return false;
+        }
+        for (var attempt = 0; attempt < 5; attempt++) {
+            if (pingMemcached()) {
+                return true;
+            }
+            try {
+                Thread.sleep(500L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private static boolean pingMemcached() {
+        try {
+            var client = MemcachedCacheClientFactory.from(memcachedConfigFromEnvironment());
+            try {
+                var stats = client.getStats();
+                return stats != null && !stats.isEmpty();
+            } finally {
+                client.shutdown();
+            }
+        } catch (RuntimeException | java.io.IOException e) {
             return false;
         }
     }
