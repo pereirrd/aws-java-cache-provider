@@ -197,7 +197,7 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 - [x] Formalizar interface CRUD `<ID, M>` (`BackingRepository` em `…core`: `findById`, `save`, `deleteById`); **sem** `EntityManager` na API pública.
 - [x] Documentar implementação pelo consumidor (README *cache-aside*; JPA/Spring Data na app).
-- [ ] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app**.
+- [ ] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app** (*write-through*: ordem origem→cache documentada).
 - [ ] Testes de integração BD (H2 / Testcontainers PostgreSQL/MySQL) **só** no módulo JPA.
 
 ---
@@ -231,8 +231,8 @@ Depende de **`…-core`**.
 
 Depende de **`…-core`**.
 
-- [ ] Escrita coordenada: origem (JPA/CRUD) + cache; definir ordem e falha parcial.
-- [ ] Testes com repositório fake + [§ 0.6](#06-testes-e-ambiente-local-decidido).
+- [x] Escrita coordenada: origem (JPA/CRUD) + cache; definir ordem e falha parcial.
+- [x] Testes com repositório fake + [§ 0.6](#06-testes-e-ambiente-local-decidido) (integração LocalStack pendente).
 
 ---
 
@@ -252,7 +252,7 @@ Depende de **`…-core`**.
 
 ## Fase 8 — Release e documentação
 
-- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (outras estratégias: *read-through* documentado; *write-through* / *write-behind* por fazer).
+- [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (*read-through* e *write-through* documentados; *write-behind* por fazer).
 - [x] CI: `mvn verify`, JDK 25, cache Maven (GitHub Actions).
 - [ ] Versionamento semântico; Maven Central / GitHub Packages; `distributionManagement`.
 - [ ] Segurança: OWASP Dependency-Check / Dependabot.
