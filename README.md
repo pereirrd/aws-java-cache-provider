@@ -1,6 +1,31 @@
 # aws-java-cache-provider
 
-Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write-through*, *write-behind*) sobre **Amazon ElastiCache** (Redis ou Memcached) e persistência JPA plugável.
+Biblioteca Java com estratégias de cache (*cache-aside*, *read-through*, *write-through*, *write-behind*) sobre **Amazon ElastiCache** (Redis ou Memcached) e persistência JPA plugável. O código está funcional e coberto por testes unitários e de integração (ver [`docs/integration-tests.md`](docs/integration-tests.md)), mas **não foi utilizado em nenhuma aplicação real de produção** — não há validação de escalabilidade, consumo de recursos, SLOs nem operação prolongada sob carga.
+
+## Caráter educativo
+
+Este projeto tem **somente finalidade educativa e experimental**. Não é um produto comercial nem uma biblioteca recomendada para produção. A intenção era somente testar a implementação de diferentes estratégias de cache usando funcionalidades do Cursor, como sub-agents e cloud agents, pela IDE e por interface web acessando pelo celular.
+
+## Finalização do projeto
+
+A implementação foi concluída como **experiência de desenvolvimento assistido por IA** no ecossistema Cursor:
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Subagentes Cursor** | Tarefas divididas em fases (`CacheMetrics`, JPA, anotações, integração) executadas por subagentes locais com branches e commits independentes |
+| **Agents na interface web** | Parte do trabalho foi coordenada a partir da **interface web do Cursor**, com agentes acionados **pelo celular** (comando remoto, revisão e orientação fora do IDE desktop) |
+| **Spec-driven development** | Escopo, checklist (`docs/checklist.md`) e decisões de arquitetura (§ 0.x) guiaram a implementação fase a fase |
+| **Estado funcional** | `mvn clean verify` e perfis `-Pintegration` / `-Pintegration-compose` validam o comportamento contra Redis, LocalStack e H2 (módulo JPA) |
+| **Fora de escopo** | Publicação em Maven Central, OWASP/Dependabot e uso em produção com métricas de recurso |
+
+**Para sistemas reais em produção**, recomendamos ecossistemas com *cache providers* maduros, observabilidade integrada e comunidade ativa, por exemplo:
+
+- **[Spring Boot](https://spring.io/projects/spring-boot)** — `spring-boot-starter-cache`, integração com Redis/Caffeine/Hazelcast, `@Cacheable` / `@CacheEvict`, métricas via Actuator/Micrometer
+- **[Micronaut](https://micronaut.io/)** — cache declarativo, suporte a Redis e Caffeine, baixa pegada de memória e bom encaixe em microsserviços
+
+Este projeto serve para estudar padrões de cache, integração com ElastiCache e fluxos de desenvolvimento com agentes de IA — **não** como substituto dessas soluções de mercado.
+
+Documentação de encerramento: [`docs/release.md`](docs/release.md) · checklist completo: [`docs/checklist.md`](docs/checklist.md).
 
 ## Pré-requisitos
 
@@ -121,6 +146,42 @@ service.evict(42L);
 service.putCached(42L, updatedUser);
 ```
 
+## Cache-aside (anotações)
+
+Para evitar repetir função de chave e TTL no código, declare metadados na classe da entidade e use
+`CacheAsideAnnotationResolver` ou `CacheAsideService.fromAnnotations`. Não há AOP nem bytecode weaving: a
+aplicação invoca o resolver explicitamente ([§ 0.3](docs/checklist.md#03-stack-core-puro-java-e-aws-decidido)).
+
+| Anotação | Onde | Função |
+|----------|------|--------|
+| `@CacheRegion` / `@CacheName` | classe | namespace (ex.: `"users"` → chave `users:{id}`) |
+| `@CacheKey` | classe, campo ou getter | template com `{id}` na classe; marca o identificador no campo/getter |
+| `@CacheTtl` | classe ou campo id | TTL de entrada (`value` + `unit`, default 5 minutos) |
+| `@CacheId` | campo ou getter | identificador quando não há `jakarta.persistence.Id` |
+
+```java
+@CacheRegion("users")
+@CacheTtl(value = 10, unit = TimeUnit.MINUTES)
+public class User {
+    @CacheId
+    private Long id;
+    private String name;
+    // getters...
+}
+
+CacheAsideService<Long, User> service = CacheAsideService.fromAnnotations(
+    cache, userRepository, User.class, userSerializer);
+
+// Ou só metadados (chave + TTL + extrator de id):
+@SuppressWarnings("unchecked")
+CacheAsideMetadata<Long> metadata =
+    (CacheAsideMetadata<Long>) CacheAsideAnnotationResolver.resolve(User.class);
+String key = metadata.cacheKeyForId().apply(42L); // "users:42"
+```
+
+Com template explícito: `@CacheKey("profile:{id}")` na classe. O resolver também reconhece
+`jakarta.persistence.Id` via reflexão (sem dependência JPA no módulo cache-aside).
+
 ## Read-through (uso programático)
 
 1. Obtenha um `CacheProvider` a partir do `core` (Redis ou Memcached via fábricas / CDI).
@@ -200,6 +261,31 @@ service.close(); // flush + encerra o processador
 
 **Backpressure:** quando a fila enche, `save` / `deleteById` lançam `CacheException` após o efeito no cache; ajuste `WriteBehindConfig#queueCapacity` ou chame `flush()`.
 
+## Observabilidade (`CacheMetrics`)
+
+Todos os serviços de estratégia aceitam um `CacheMetrics` opcional (default `CacheMetrics.NO_OP`) para *hooks* de hit/miss, carga na origem, `put` e `evict`, com latência por operação.
+
+```java
+CacheMetrics metrics = new CacheMetrics() {
+    @Override
+    public void onCacheHit(String cacheKey, Duration latency) {
+        // ex.: exportar para Micrometer na aplicação
+    }
+
+    @Override
+    public void onCacheMiss(String cacheKey, Duration latency) {
+        // ...
+    }
+};
+
+CacheAsideService<Long, User> service = new CacheAsideService<>(
+    cache, userRepository, id -> "users:" + id, userSerializer, ttl, metrics);
+```
+
+Em *write-behind*, `WriteBehindMetrics` cobre fila e *flush*; `CacheMetrics` cobre operações de leitura/escrita no cache (parâmetro adicional no construtor completo).
+
+Detalhes de TTL por estratégia: [`docs/ttl-por-estrategia.md`](docs/ttl-por-estrategia.md).
+
 ## Módulos (coordenadas Maven)
 
 | Módulo | `artifactId` |
@@ -209,8 +295,11 @@ service.close(); // flush + encerra o processador
 | Read-through | `aws-java-cache-provider-read-through` |
 | Write-through | `aws-java-cache-provider-write-through` |
 | Write-behind | `aws-java-cache-provider-write-behind` |
+| JPA (exemplo `BackingRepository`) | `aws-java-cache-provider-jpa` |
 
 `groupId`: `io.github.pereirrd.awsjavacache` · `version`: ver o POM raiz (ex.: `0.1.0-SNAPSHOT`).
+
+> **Nota:** os artefactos **não são publicados** em repositório Maven remoto; use `mvn clean install` localmente se quiser consumir os JARs no seu ambiente.
 
 Exemplo de dependência ao usar só *cache-aside* (o `core` entra por transitividade):
 
@@ -224,11 +313,7 @@ Exemplo de dependência ao usar só *cache-aside* (o `core` entra por transitivi
 
 ## Publicar artefactos
 
-1. Configurar `distributionManagement` e credenciais no `settings.xml` do Maven (Sonatype OSSRH / GitHub Packages / repositório interno).
-2. Garantir assinatura GPG e `javadoc`/`sources` conforme os requisitos do alvo de publicação.
-3. Executar o *release* Maven adequado (ex.: `mvn deploy` ou fluxo `release:prepare` / `release:perform`).
-
-Detalhes de CI e *release* semântico estão planeados na Fase 8 do `docs/checklist.md`.
+**Não previsto neste projeto.** Por decisão de escopo (projeto educativo), não há `distributionManagement` nem pipeline de deploy. Para referência futura sobre versionamento semântico, ver [`docs/release.md`](docs/release.md).
 
 ## Licença
 

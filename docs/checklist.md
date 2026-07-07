@@ -111,7 +111,7 @@ Todas as subsecções abaixo estão **decididas**; funcionam como contrato de ar
 | [Fase 2](#fase-2) | `…-core` |
 | [Fase 3](#fase-3) | SPI JPA + testes isolados |
 | [Fases 4–7](#fase-4) | Um módulo por estratégia |
-| [Fase 8](#fase-8) | README com coordenadas por módulo; *BOM* opcional no PAI |
+| [Fase 8](#fase-8) | README, release docs; publicação Maven **fora de scope** |
 
 ---
 
@@ -187,8 +187,8 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 - [x] Interfaces: fábrica de conexão (Redis vs Memcached), configuração (endpoints, TLS, timeouts, *pool*).
 - [x] Modelo chave/valor (serialização via `CacheValueSerializer`; limites por engine a documentar no consumidor).
 - [x] Exceções base (`CacheException`; *timeouts* / indisponibilidade a expandir).
-- [ ] Métricas e *hooks* opcionais (hit/miss, latência).
-- [ ] Documentar **TTL** por estratégia (parcial: `CacheProvider#put` com `Duration`, *cache-aside* com TTL por serviço).
+- [x] Métricas e *hooks* opcionais (hit/miss, latência) — `CacheMetrics` em `…-core`, integrado nas estratégias.
+- [x] Documentar **TTL** por estratégia — [`docs/ttl-por-estrategia.md`](ttl-por-estrategia.md).
 
 ---
 
@@ -200,8 +200,8 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 
 - [x] Formalizar interface CRUD `<ID, M>` (`BackingRepository` em `…core`: `findById`, `save`, `deleteById`); **sem** `EntityManager` na API pública.
 - [x] Documentar implementação pelo consumidor (README *cache-aside*; JPA/Spring Data na app).
-- [ ] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app** (*write-through*: ordem origem→cache documentada).
-- [ ] Testes de integração BD (H2 / Testcontainers PostgreSQL/MySQL) **só** no módulo JPA.
+- [x] *Write-through* / *write-behind*: contrato transacional do repositório; `@Transactional` só em exemplos na **app** (*write-through*: ordem origem→cache documentada) — [`docs/contrato-transacional.md`](contrato-transacional.md).
+- [x] Testes de integração BD (H2 / Testcontainers PostgreSQL/MySQL) **só** no módulo JPA (`…-jpa`, H2 em `JpaBackingRepositoryIT`).
 
 ---
 
@@ -212,10 +212,10 @@ Tarefas executáveis para criar o repositório e o *classpath*. Decisões de mó
 Depende de **`…-core`**. [§ 0.5](#05-estrutura-modular-da-biblioteca-decidido).
 
 - [x] Fluxo: `get` → *miss* → `BackingRepository#findById` → `put` com TTL (`CacheAsideService`).
-- [ ] **Anotações** Java (chave, TTL, id de cache); processamento em runtime opcional / na app ([§ 0.3](#03-stack-core-puro-java-e-aws-decidido)).
+- [x] **Anotações** Java (chave, TTL, id de cache); processamento em runtime opcional / na app ([§ 0.3](#03-stack-core-puro-java-e-aws-decidido)).
 - [x] API de invalidação/atualização explícita (`evict`, `putCached`; README).
 - [x] Testes unitários (dublês de `CacheProvider` + repositório).
-- [x] Testes de integração: [§ 0.6](#06-testes-e-ambiente-local-decidido) (`mvn verify -Pintegration` no `…-core` e `…-cache-aside`).
+- [x] Testes de integração: [§ 0.6](#06-testes-e-ambiente-local-decidido) (`CacheAsideServiceComposeIT`; Redis/Memcached no `…-core`).
 
 ---
 
@@ -257,8 +257,10 @@ Depende de **`…-core`**.
 
 - [x] README: snippet *cache-aside*; **coordenadas Maven por módulo** ([§ 0.5](#05-estrutura-modular-da-biblioteca-decidido)) (*read-through*, *write-through* e *write-behind* documentados).
 - [x] CI: `mvn verify`, JDK 25, cache Maven (GitHub Actions).
-- [ ] Versionamento semântico; Maven Central / GitHub Packages; `distributionManagement`.
-- [ ] Segurança: OWASP Dependency-Check / Dependabot.
+- [x] Política de versionamento semântico documentada — [`docs/release.md`](release.md) (`0.1.0-SNAPSHOT` → `1.0.0` quando estável).
+- [x] Testes compose Memcached opcionais — `MemcachedCacheProviderComposeIT` ([`integration-tests.md`](integration-tests.md)).
+- [ ] ~~Maven Central / GitHub Packages; `distributionManagement`~~ — **N/A / adiado** (decisão do projecto: sem publicação configurada; ver [`release.md`](release.md)).
+- [ ] ~~OWASP Dependency-Check / Dependabot~~ — **N/A / adiado** (fora de scope desta fase).
 
 ---
 

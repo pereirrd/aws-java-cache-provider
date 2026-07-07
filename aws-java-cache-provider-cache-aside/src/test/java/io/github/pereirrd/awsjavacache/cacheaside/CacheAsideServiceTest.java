@@ -2,6 +2,7 @@ package io.github.pereirrd.awsjavacache.cacheaside;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.pereirrd.awsjavacache.api.metrics.CacheMetrics;
 import io.github.pereirrd.awsjavacache.api.repository.BackingRepository;
 import io.github.pereirrd.awsjavacache.api.serialization.CacheValueSerializer;
 import io.github.pereirrd.awsjavacache.core.CacheProvider;
@@ -21,14 +22,16 @@ class CacheAsideServiceTest {
 
     private StubCache cache;
     private StubRepository repository;
+    private RecordingCacheMetrics metrics;
     private CacheAsideService<Long, String> service;
 
     @BeforeEach
     void setUp() {
         cache = new StubCache();
         repository = new StubRepository();
-        service =
-                new CacheAsideService<>(cache, repository, id -> "user:" + id, CacheValueSerializer.utf8Strings(), TTL);
+        metrics = new RecordingCacheMetrics();
+        service = new CacheAsideService<>(
+                cache, repository, id -> "user:" + id, CacheValueSerializer.utf8Strings(), TTL, metrics);
     }
 
     @Test
@@ -69,6 +72,32 @@ class CacheAsideServiceTest {
         service.putCached(5L, "pat");
         assertThat(cache.store.get("user:5")).isEqualTo("pat");
         assertThat(cache.lastPutTtl).isEqualTo(TTL);
+        assertThat(metrics.putKeys).containsExactly("user:5");
+    }
+
+    @Test
+    void get_onHit_recordsCacheHitWithoutOriginLoad() {
+        cache.store.put("user:6", "cached");
+        assertThat(service.get(6L)).contains("cached");
+        assertThat(metrics.hitKeys).containsExactly("user:6");
+        assertThat(metrics.missKeys).isEmpty();
+        assertThat(metrics.originLoadKeys).isEmpty();
+    }
+
+    @Test
+    void get_onMiss_recordsMissOriginLoadAndPut() {
+        repository.findByIdResult = Optional.of("loaded");
+        assertThat(service.get(7L)).contains("loaded");
+        assertThat(metrics.missKeys).containsExactly("user:7");
+        assertThat(metrics.originLoadKeys).containsExactly("user:7");
+        assertThat(metrics.putKeys).containsExactly("user:7");
+        assertThat(metrics.hitKeys).isEmpty();
+    }
+
+    @Test
+    void evict_recordsCacheEvict() {
+        service.evict(8L);
+        assertThat(metrics.evictedKeys).containsExactly("user:8");
     }
 
     private static final class StubCache implements CacheProvider {
@@ -143,6 +172,40 @@ class CacheAsideServiceTest {
         @Override
         public void deleteById(Long id) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    private static final class RecordingCacheMetrics implements CacheMetrics {
+
+        final List<String> hitKeys = new ArrayList<>();
+        final List<String> missKeys = new ArrayList<>();
+        final List<String> originLoadKeys = new ArrayList<>();
+        final List<String> putKeys = new ArrayList<>();
+        final List<String> evictedKeys = new ArrayList<>();
+
+        @Override
+        public void onCacheHit(String cacheKey, Duration latency) {
+            hitKeys.add(cacheKey);
+        }
+
+        @Override
+        public void onCacheMiss(String cacheKey, Duration latency) {
+            missKeys.add(cacheKey);
+        }
+
+        @Override
+        public void onOriginLoad(String cacheKey, Duration latency) {
+            originLoadKeys.add(cacheKey);
+        }
+
+        @Override
+        public void onCachePut(String cacheKey, Duration latency) {
+            putKeys.add(cacheKey);
+        }
+
+        @Override
+        public void onCacheEvict(String cacheKey) {
+            evictedKeys.add(cacheKey);
         }
     }
 }

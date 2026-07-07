@@ -30,6 +30,7 @@ ver [`localstack.md`](localstack.md).
 
 - `LocalStackAwsSdkComposeIT` — STS, Secrets Manager (secret de bootstrap), CloudWatch
 - `RedisCacheProviderComposeIT` — put/get, remove, TTL
+- `MemcachedCacheProviderComposeIT` — put/get, invalidate *(opcional; requer `docker compose --profile memcached up -d` e `AWS_JAVA_CACHE_MEMCACHED_NODES` no `.env`)*
 
 **Cache-aside (`integration-compose`):**
 
@@ -47,7 +48,7 @@ ver [`localstack.md`](localstack.md).
 
 - `WriteBehindServiceComposeIT` — save cache→flush origem, hit, delete cache→flush origem
 
-Total: **18 testes** de integração compose (6 no core + 3 por módulo de estratégia).
+Total: **20 testes** de integração compose (8 no core + 3 por módulo de estratégia; Memcached skipped quando o profile não está activo).
 
 ---
 
@@ -70,6 +71,7 @@ Edite `.env` conforme necessário. Variáveis essenciais:
 | `AWS_DEFAULT_REGION` | `us-east-1` | Região emulada |
 | `AWS_JAVA_CACHE_REDIS_HOST` | `localhost` | Host Redis (data plane) |
 | `AWS_JAVA_CACHE_REDIS_PORT` | `6379` | Porta Redis |
+| `AWS_JAVA_CACHE_MEMCACHED_NODES` | `localhost:11211` | Nós Memcached *(opcional; descomentar no `.env` com profile `memcached`)* |
 | `LOCALSTACK_AUTH_TOKEN` | *(token)* | Obrigatório em imagens LocalStack recentes (março 2026+) |
 
 Obtenha o token em [app.localstack.cloud](https://app.localstack.cloud). Sem token, o container
@@ -142,6 +144,9 @@ docker exec aws-java-cache-redis redis-cli ping
 # Secret de bootstrap
 docker exec aws-java-cache-localstack awslocal secretsmanager get-secret-value \
   --secret-id aws-java-cache/local/redis-password
+
+# Memcached (opcional; após docker compose --profile memcached up -d)
+docker exec aws-java-cache-memcached sh -c 'echo stats | nc localhost 11211 | head -1'
 ```
 
 ---
